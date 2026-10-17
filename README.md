@@ -159,6 +159,80 @@ repos:
       - id: lintex
 ```
 
+## Recommended setup: lintex + ruff + mypy
+
+lintex only catches known agent mistakes. It does not check that code is correct, well designed
+or does what you asked. Pair it with a general linter, a type checker and your tests:
+
+| Layer | Catches | When to run |
+|---|---|---|
+| **lintex** | Hallucinated APIs, injection and security shortcuts, elided code, silenced errors, bloat | After every agent edit (hook) and at commit |
+| **ruff** | Hundreds of general bug and style patterns, unused imports, undefined names | After every agent edit and at commit |
+| **mypy** / **pyright** | Wrong argument counts, invented methods on typed objects, `None` misuse | At commit and in CI (too slow for every edit on large projects) |
+| **pytest** | Whether the code actually works | At commit and in CI |
+
+### Claude Code hooks
+
+Install both fast checks as `PostToolUse` hooks so the agent fixes cheap mistakes immediately
+(`lintex install-hook claude-code` adds the first one). In `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {"type": "command", "command": "lintex hook claude-code"},
+          {"type": "command", "command": "jq -r '.tool_input.file_path // empty' | grep '\\.py$' | xargs -r ruff check --fix --exit-non-zero-on-fix 1>&2 || exit 2"}
+        ]
+      }
+    ]
+  }
+}
+```
+
+Each hook exits 2 on findings, and Claude Code passes its stderr back to the model. The ruff hook
+auto-fixes what it safely can and reports the rest. If `jq` is not installed, use a short Python
+script instead of the shell pipeline.
+
+### Pre-commit framework
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/700799/lintex
+    rev: v0.1.0
+    hooks:
+      - id: lintex
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+```
+
+Then `pip install pre-commit && pre-commit install`. Pin `rev` values to the versions you actually
+want; the ones above are examples.
+
+### Agent instructions
+
+Add this to your `CLAUDE.md` (or equivalent) so the agent knows the checks exist and how to react:
+
+```markdown
+## Code quality
+- `lintex check <file>` and `ruff check <file>` run automatically after each edit.
+  Fix every reported issue as its `fix:` line says before moving on.
+- Never suppress a finding (`# lintex: ignore`, `# noqa`) to make it go away;
+  suppress only when the code is deliberately an exception, and say why in the comment.
+- Run `mypy src` and `pytest` before declaring a task done.
+```
+
 ## Library API
 
 ```python

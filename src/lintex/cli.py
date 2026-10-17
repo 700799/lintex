@@ -12,8 +12,8 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import json
-import os
 import sys
+import textwrap
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -29,7 +29,7 @@ from lintex.hooks.git import (
     staged_python_files,
 )
 from lintex.models import Severity
-from lintex.reporters import format_json, format_text
+from lintex.reporters import FORMATS, Style, dim_note, render
 from lintex.rules import ALL_RULES, get_rule, is_rule_active
 
 COMMANDS = ("check", "rules", "explain", "install-hook", "hook")
@@ -50,7 +50,20 @@ def build_parser() -> argparse.ArgumentParser:
 
     check = sub.add_parser("check", help="lint files or directories (the default command)")
     check.add_argument("paths", nargs="*", help="files or directories (default: current directory)")
-    check.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    check.add_argument(
+        "--format",
+        choices=FORMATS,
+        default=None,
+        help="output style: pretty (default, grouped by file), full (every finding with why and "
+        "fix, for agents), concise (one line per finding), github (Actions annotations), json",
+    )
+    check.add_argument("--json", action="store_true", help="shorthand for --format json")
+    check.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="show the `why` for every finding, not just the first of each rule",
+    )
     check.add_argument(
         "--staged",
         action="store_true",
@@ -147,15 +160,17 @@ def _cmd_check(args: argparse.Namespace) -> int:
         linter = Linter(config)
         result = linter.lint_paths(paths)
 
-    if args.json:
-        print(format_json(result))
-    else:
-        color = (
-            args.color
-            if args.color is not None
-            else (sys.stdout.isatty() and "NO_COLOR" not in os.environ)
+    fmt = "json" if args.json else (args.format or "pretty")
+    style = Style.detect(sys.stdout, color=args.color)
+    print(render(result, fmt, style, verbose=args.verbose))
+    if fmt == "pretty" and result.violations and config.source is None:
+        print(
+            dim_note(
+                "No lintex config found. Tune rules or exclude paths with a [tool.lintex] "
+                "table in pyproject.toml (see `lintex rules`).",
+                style,
+            )
         )
-        print(format_text(result, color=color))
     if args.exit_zero:
         return EXIT_OK
     return EXIT_VIOLATIONS if result.failed(config.fail_on) else EXIT_OK
@@ -193,11 +208,34 @@ def _cmd_rules(args: argparse.Namespace) -> int:
     if args.json:
         print(json.dumps(rows, indent=2))
         return EXIT_OK
+    style = Style.detect(sys.stdout)
     width = max(len(r["name"]) for r in rows)
+    group = ""
     for r in rows:
-        state = "on " if r["enabled"] else "off"
-        print(f"{r['code']}  {r['name']:<{width}}  {state}  {r['severity']:<7}  {r['summary']}")
+        if r["code"][:3] != group:
+            group = r["code"][:3]
+            print(style.paint(_GROUP_TITLES.get(group, ""), "bold"))
+        if r["enabled"]:
+            state = style.paint(" on ", "green")
+        else:
+            state = style.paint("off ", "dim")
+        sev = style.paint(r["severity"].ljust(7), "red" if r["severity"] == "error" else "yellow")
+        name = r["name"].ljust(width)
+        note = "" if r["default_enabled"] else style.paint("  (opt-in: add to `enable`)", "dim")
+        print(
+            f"  {style.paint(r['code'], 'cyan', 'bold')}  {name}  {state} {sev} {r['summary']}{note}"
+        )
+    print(style.paint("\nRun `lintex explain CODE` for a rule's rationale and options.", "dim"))
     return EXIT_OK
+
+
+_GROUP_TITLES = {
+    "LX0": "Parsing",
+    "LX1": "Hallucinated imports and APIs",
+    "LX2": "Banned and insecure patterns",
+    "LX3": "Agent bloat",
+    "LX4": "Agent artifacts",
+}
 
 
 def _cmd_explain(args: argparse.Namespace) -> int:
@@ -207,17 +245,26 @@ def _cmd_explain(args: argparse.Namespace) -> int:
             f"lintex: unknown rule {args.rule!r}; run `lintex rules` to list them", file=sys.stderr
         )
         return EXIT_USAGE
+    style = Style.detect(sys.stdout)
+    sev = rule.default_severity.value
+    badge = style.paint(f" {sev} ", "bold", "red" if sev == "error" else "yellow")
+    optin = "" if rule.default_enabled else style.paint("  opt-in", "dim")
     print(
-        f"{rule.code} {rule.name} ({rule.default_severity.value}"
-        f"{'' if rule.default_enabled else ', opt-in'})\n"
+        f"{style.paint(rule.code, 'cyan', 'bold')} {style.paint(rule.name, 'bold')}  {badge}{optin}\n"
     )
-    print(rule.summary + "\n")
+    print(textwrap.fill(rule.summary, style.width) + "\n")
     if rule.explanation:
-        print(rule.explanation + "\n")
+        for para in rule.explanation.split("\n\n"):
+            if para.startswith("    "):
+                print(para + "\n")  # preformatted example
+            else:
+                print(textwrap.fill(para, style.width) + "\n")
     if rule.options:
-        print(f"Options ([tool.lintex.rules.{rule.name}]):")
+        print(style.paint(f"Options  [tool.lintex.rules.{rule.name}]", "bold"))
         for key, value in rule.options.items():
-            print(f"  {key} = {json.dumps(value)}")
+            print(f"  {style.paint(key, 'cyan')} = {json.dumps(value)}")
+        print()
+    print(style.paint(f"Silence one line with  # lintex: ignore[{rule.code}]", "dim"))
     return EXIT_OK
 
 

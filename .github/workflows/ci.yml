@@ -36,4 +36,4 @@ jobs:
       - run: python -m pip install -e . ruff
       - run: ruff check src tests
       - run: ruff format --check src tests
-      - run: lintex check .
+      - run: lintex check . --format github

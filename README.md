@@ -6,11 +6,36 @@ actually make, such as hallucinated imports, removed APIs, SQL built with f-stri
 explanation an agent can act on directly.
 
 ```text
-app/db.py:14:17: LX201 [error] SQL statement built with an f-string; interpolated values are not escaped.
-    | cur.execute(f"SELECT * FROM users WHERE email = '{email}'")
-    why: Interpolating values into SQL text allows SQL injection whenever any value is influenced by user input, and breaks on quotes in ordinary data.
-    fix: Use bound parameters and pass values separately, e.g. `cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))` ...
+app/db.py  2 errors
+  7:21    ✖ error   LX201  SQL statement built with an f-string; interpolated values are not escaped.
+         7 │ cur.execute(f"SELECT * FROM users WHERE email = '{email}'")
+           │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+         why Interpolating values into SQL text allows SQL injection whenever any value is
+             influenced by user input, and breaks on quotes in ordinary data.
+         fix Use bound parameters and pass values separately, e.g. `cur.execute("SELECT * FROM
+             users WHERE id = %s", (user_id,))` (placeholder style depends on the driver: `?` for
+             sqlite3, `%s` for psycopg/MySQLdb, `:name` with SQLAlchemy `text()`). ...
+
+  13:9    ✖ error   LX401  Placeholder comment '... rest of the implementation unchanged' stands
+                           in for code that is not there.
+         13 │ # ... rest of the implementation unchanged
+            │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+         why This looks like an elided edit: an LLM summarised existing code with a comment
+             instead of reproducing it, so saving the file deletes that code.
+         fix Restore the omitted code from the previous version of the file (e.g. `git diff` /
+             `git show HEAD:<path>`), then make only the intended change.
+
+✖ Found 2 errors in 1 file  · checked 1 file in 4 ms
+  LX201 sql-string-interpolation  ×1
+  LX401 placeholder-code          ×1
+  Each finding's `fix` line says what to write instead. `lintex explain CODE` has the full story;
+  `# lintex: ignore[CODE]` silences a line on purpose.
 ```
+
+Findings are grouped by file with the exact span underlined. The rationale (`why`) is shown
+once per rule so a long report stays readable; pass `-v` to see it every time. Output is coloured
+on a terminal and falls back to plain ASCII where Unicode or colour isn't available (`NO_COLOR`
+and `FORCE_COLOR` are honoured).
 
 - **Fast enough for the agent loop.** One `ast.parse` and one tree walk per file, with rules
   dispatched by node type. The cost is close to parsing alone. The CPython stdlib (~300k lines)
@@ -35,7 +60,11 @@ pip install "lintex[yaml]"    # if you want .lintex.yaml configuration
 lintex                          # lint the current directory
 lintex check src/ app.py        # lint specific paths
 lintex check --staged           # lint what is staged in git (the index, not the working tree)
-lintex check --json             # machine-readable output
+lintex check --json             # machine-readable output (same as --format json)
+lintex check --format concise   # one `path:line:col: CODE message` per finding, for editors/grep
+lintex check --format github    # GitHub Actions annotations, shown inline on the PR diff
+lintex check --format full      # every finding with its full why/fix; what the hooks give agents
+lintex check -v                 # pretty output with the rationale repeated for every finding
 lintex check --select LX1,LX2   # only hallucination + banned-pattern rules
 lintex check --fail-on warning  # non-zero exit on warnings too
 lintex rules                    # list rules and whether they are enabled

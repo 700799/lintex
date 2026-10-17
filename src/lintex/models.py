@@ -44,6 +44,9 @@ class Violation:
     why: str = ""
     fix: str = ""
     end_line: int | None = None
+    #: 1-based, exclusive; only meaningful when ``end_line == line``.
+    end_col: int | None = None
+    #: The offending source line with its indentation (trailing whitespace removed).
     snippet: str = ""
 
     def to_dict(self) -> dict[str, Any]:
@@ -55,8 +58,9 @@ class Violation:
             "line": self.line,
             "col": self.col,
             "end_line": self.end_line,
+            "end_col": self.end_col,
             "message": self.message,
             "why": self.why,
             "fix": self.fix,
-            "snippet": self.snippet,
+            "snippet": self.snippet.strip(),
         }

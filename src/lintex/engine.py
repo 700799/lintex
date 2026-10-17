@@ -222,7 +222,7 @@ class Linter:
         lineno = getattr(exc, "lineno", None) or 1
         offset = getattr(exc, "offset", None) or 1
         msg = getattr(exc, "msg", None) or str(exc)
-        snippet = lines[lineno - 1].strip() if 0 < lineno <= len(lines) else ""
+        snippet = lines[lineno - 1].rstrip() if 0 < lineno <= len(lines) else ""
         lo, hi = max(1, lineno - 2), lineno + 2
         violation = Violation(
             code=SyntaxErrorRule.code,
@@ -232,6 +232,7 @@ class Linter:
             line=lineno,
             col=offset,
             severity=Severity.ERROR,
+            end_col=getattr(exc, "end_offset", None) or None,
             why="The file is not valid Python, so it cannot be imported or run, and no other "
             "checks were performed. This often happens when an edit was truncated or applied "
             "to the wrong place.",

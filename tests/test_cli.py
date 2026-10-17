@@ -29,9 +29,23 @@ def test_check_text_and_exit_codes(project, capsys):
     (project / "bad.py").write_text(BAD)
     assert main(["check", "bad.py", "--no-color"]) == 1
     out = capsys.readouterr().out
-    assert "bad.py:4:12: LX203 [error]" in out
-    assert "fix:" in out and "why:" in out
+    assert "bad.py" in out and "4:12" in out and "LX203" in out
+    assert "fix" in out and "why" in out
+    assert "No lintex config found" not in out  # the fixture has a pyproject [tool.lintex]
     assert main(["bad.py", "--exit-zero"]) == 0
+
+    assert main(["check", "bad.py", "--format", "concise", "--no-color"]) == 1
+    assert "bad.py:4:12: LX203 `pickle.loads()`" in capsys.readouterr().out
+
+    assert main(["check", "bad.py", "--format", "full", "--no-color"]) == 1
+    assert "bad.py:4:12: LX203 [error]" in capsys.readouterr().out
+
+
+def test_no_config_hint_shows_only_without_config(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "bad.py").write_text(BAD)
+    assert main(["bad.py", "--no-color"]) == 1
+    assert "No lintex config found" in capsys.readouterr().out
 
 
 def test_check_json(project, capsys):

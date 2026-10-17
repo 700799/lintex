@@ -129,12 +129,19 @@ class Rule:
         severity: Severity | None = None,
         col: int | None = None,
     ) -> Violation:
+        end_col: int | None = None
         if isinstance(node, int):
             line, column, end_line = node, (col or 0), None
+            text = ctx.line_text(line)
         else:
             line = getattr(node, "lineno", 1)
-            column = getattr(node, "col_offset", 0) if col is None else col
             end_line = getattr(node, "end_lineno", None)
+            text = ctx.line_text(line)
+            # ast columns are UTF-8 byte offsets; reporters need character offsets.
+            column = _byte_to_char(text, getattr(node, "col_offset", 0)) if col is None else col
+            end_offset = getattr(node, "end_col_offset", None)
+            if end_offset is not None and end_line == line:
+                end_col = _byte_to_char(text, end_offset) + 1
         return Violation(
             code=self.code,
             rule=self.name,
@@ -146,8 +153,15 @@ class Rule:
             why=why,
             fix=fix,
             end_line=end_line,
-            snippet=ctx.line_text(line).strip(),
+            end_col=end_col,
+            snippet=text.rstrip(),
         )
+
+
+def _byte_to_char(text: str, byte_offset: int) -> int:
+    if byte_offset <= 0 or text.isascii():
+        return max(byte_offset, 0)
+    return len(text.encode("utf-8")[:byte_offset].decode("utf-8", errors="ignore"))
 
 
 # -- shared AST helpers ---------------------------------------------------

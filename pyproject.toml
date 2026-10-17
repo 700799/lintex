@@ -1,0 +1,87 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lintex"
+dynamic = ["version"]
+description = "A fast, AST-based linter for code written by LLM coding agents, with fix-it feedback an agent can act on."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [{ name = "lintex contributors" }]
+keywords = ["linter", "ast", "llm", "ai-agents", "claude-code", "pre-commit", "static-analysis"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Typing :: Typed",
+]
+dependencies = [
+    "tomli>=1.1; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+yaml = ["pyyaml>=5.4"]
+
+[project.scripts]
+lintex = "lintex.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/700799/lintex"
+Issues = "https://github.com/700799/lintex/issues"
+
+[dependency-groups]
+dev = ["pytest>=7", "pyyaml>=5.4", "ruff>=0.5"]
+
+[tool.hatch.version]
+path = "src/lintex/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lintex"]
+
+[tool.hatch.envs.default]
+dependencies = ["pytest>=7", "pyyaml>=5.4"]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest {args}"
+
+[tool.hatch.envs.hatch-test]
+extra-dependencies = ["pyyaml>=5.4"]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]  # line length is the formatter's job
+
+# lintex dogfoods itself.
+[tool.lintex]
+exclude = ["tests/fixtures"]
+per-file-ignores = { "tests/**" = ["LX301", "LX203", "LX201", "LX204"] }
+
+[tool.lintex.rules.function-too-long]
+max-lines = 70
+
+# Rule visitors are table-driven dispatchers; branchiness is the point.
+[tool.lintex.rules.high-complexity]
+max-complexity = 30

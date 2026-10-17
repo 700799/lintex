@@ -1,1 +1,191 @@
 # lintex
+
+**A fast linter for Python written by LLM coding agents.** lintex catches the mistakes agents
+actually make, such as hallucinated imports, removed APIs, SQL built with f-strings,
+`except Exception: pass`, and `# ... rest of the code unchanged`. It reports each one with an
+explanation an agent can act on directly.
+
+```text
+app/db.py:14:17: LX201 [error] SQL statement built with an f-string; interpolated values are not escaped.
+    | cur.execute(f"SELECT * FROM users WHERE email = '{email}'")
+    why: Interpolating values into SQL text allows SQL injection whenever any value is influenced by user input, and breaks on quotes in ordinary data.
+    fix: Use bound parameters and pass values separately, e.g. `cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))` ...
+```
+
+- **Fast enough for the agent loop.** One `ast.parse` and one tree walk per file, with rules
+  dispatched by node type. The cost is close to parsing alone. The CPython stdlib (~300k lines)
+  lints in about 3 seconds on a modest machine, and a single edited file takes a few milliseconds.
+- **Light.** The only dependency is `tomli`, and only on Python < 3.11. YAML config support is an
+  optional extra.
+- **Output an agent can act on.** Every finding has a `why` and a `fix`. Use `--json` for harnesses.
+- **Hooks included.** `lintex install-hook git` adds a pre-commit hook. `lintex install-hook
+  claude-code` sets up a Claude Code `PostToolUse` hook that reports problems back to the model
+  right after it edits a file.
+
+## Install
+
+```bash
+pip install lintex            # or: uv tool install lintex / pipx install lintex
+pip install "lintex[yaml]"    # if you want .lintex.yaml configuration
+```
+
+## Usage
+
+```bash
+lintex                          # lint the current directory
+lintex check src/ app.py        # lint specific paths
+lintex check --staged           # lint what is staged in git (the index, not the working tree)
+lintex check --json             # machine-readable output
+lintex check --select LX1,LX2   # only hallucination + banned-pattern rules
+lintex check --fail-on warning  # non-zero exit on warnings too
+lintex rules                    # list rules and whether they are enabled
+lintex explain LX101            # documentation for one rule
+```
+
+Exit status: `0` means clean (or only findings below `fail-on`), `1` means violations, `2` means
+a usage or configuration error.
+
+## Rules
+
+| Code | Name | Default | What it catches |
+|---|---|---|---|
+| LX001 | syntax-error | error | The file does not parse (often a truncated edit) |
+| **LX1xx** | **Hallucination guard** | | |
+| LX101 | hallucinated-api | error/warn | Removed or renamed APIs: `collections.Mapping`, `distutils`, `numpy.float`, `openai.ChatCompletion`, `pydantic.BaseSettings`, `dict.iteritems()`, `datetime.utcnow()` (warn), ... |
+| LX102 | nonexistent-stdlib-name | error | Names that don't exist in a stdlib module (`os.path.joinpath`, `from typing import Json`), with "did you mean" suggestions |
+| LX103 | unresolvable-import | *opt-in* | Imports that aren't installed, stdlib, or local modules |
+| **LX2xx** | **Banned patterns** | | |
+| LX201 | sql-string-interpolation | error | SQL built with f-strings, `.format()`, `%`, or `+` |
+| LX202 | raw-sql | *opt-in* | Any raw SQL in `.execute()` / `text()` for ORM-only projects |
+| LX203 | dangerous-call | error | `eval`/`exec`, `pickle.loads`, `yaml.load`, `os.system`, `shell=True`, `verify=False` |
+| LX204 | insecure-file-operation | error | `tempfile.mktemp`, world-writable modes, tar `extractall()` without `filter=`, hard-coded `/tmp/` paths |
+| LX205 | banned-api | error | Project-specific banned modules and functions, with your own message |
+| **LX3xx** | **Agent bloat** | | |
+| LX301 | function-too-long | warning | More than 50 lines of code (says which blocks to extract) |
+| LX302 | high-complexity | warning | Cyclomatic complexity above 10 |
+| LX303 | too-many-parameters | warning | More than 7 parameters |
+| LX304 | deep-nesting | warning | Blocks nested more than 4 levels deep |
+| LX305 | file-too-long | warning | Module with more than 600 lines of code |
+| **LX4xx** | **Agent artifacts** | | |
+| LX401 | placeholder-code | error | `# ... existing code ...` and other elided edits; `# TODO: implement` (warning) |
+| LX402 | swallowed-exception | error | `except Exception: pass` |
+| LX403 | bare-except | warning | `except:` |
+
+Hallucination rules skip code inside compatibility guards, such as `try: ... except ImportError`
+and `if sys.version_info ...` / `sys.platform` / `hasattr(...)`. LX102 imports only stdlib
+modules and never third-party code. It checks against the Python version that runs lintex.
+
+### Suppressing
+
+```python
+value = eval(expr)  # lintex: ignore[LX203]
+value = eval(expr)  # lintex: ignore            (every rule on this line)
+# lintex: skip-file                             (anywhere in the file, on its own line)
+```
+
+## Configuration
+
+lintex looks for configuration starting in the linted path's directory and moving up, and uses
+the first match among `.lintex.yaml`, `.lintex.yml`, `.lintex.toml`, and `pyproject.toml`
+(`[tool.lintex]`). Keys can be written in `kebab-case` or `snake_case`.
+
+```toml
+[tool.lintex]
+exclude = ["migrations", "scripts/legacy/*.py"]   # added to the defaults (.venv, build, ...)
+ignore = ["LX305"]
+enable = ["LX103", "raw-sql"]                     # turn on opt-in rules
+fail-on = "error"                                 # or "warning"
+severity = { LX301 = "error" }                    # change a rule's severity
+per-file-ignores = { "tests/**" = ["LX203", "LX301"] }
+
+[tool.lintex.rules.function-too-long]
+max-lines = 40
+
+[tool.lintex.rules.raw-sql]
+hint = "Use the repository classes in app/db/repos.py instead of hand-written SQL."
+
+[tool.lintex.rules.banned-api]
+apis = { "requests" = "Use app.http.client (it adds retries, timeouts and tracing).", "print" = "Use `log = structlog.get_logger()`." }
+
+[tool.lintex.rules.unresolvable-import]
+known-modules = ["google.colab"]
+```
+
+The same settings in `.lintex.yaml`:
+
+```yaml
+ignore: [LX305]
+enable: [LX103]
+rules:
+  banned-api:
+    apis:
+      requests: Use app.http.client.
+```
+
+## Hooks
+
+### Claude Code
+
+```bash
+lintex install-hook claude-code              # writes .claude/settings.json
+lintex install-hook claude-code --scope local   # .claude/settings.local.json (not committed)
+```
+
+This adds the following entry, merged with any existing settings:
+
+```json
+{"hooks": {"PostToolUse": [{"matcher": "Edit|Write|MultiEdit",
+  "hooks": [{"type": "command", "command": "lintex hook claude-code"}]}]}}
+```
+
+After each edit, lintex checks the changed file. If it finds problems, it exits with status 2 and
+prints them to stderr, and Claude Code passes that output back to the model. Errors in the hook
+itself, such as a bad payload or config, never block the agent.
+
+### Git pre-commit
+
+```bash
+lintex install-hook git        # .git/hooks/pre-commit (honours core.hooksPath)
+```
+
+The hook runs `lintex check --staged`, which lints the staged content that will actually be
+committed. To use the [pre-commit](https://pre-commit.com) framework instead:
+
+```yaml
+repos:
+  - repo: https://github.com/700799/lintex
+    rev: v0.1.0
+    hooks:
+      - id: lintex
+```
+
+## Library API
+
+```python
+from lintex import Linter, lint_source, load_config
+
+violations = lint_source(code, path="generated.py")
+for v in violations:
+    print(v.code, v.line, v.message, v.fix)
+
+linter = Linter(load_config("."))       # reuse for many files
+result = linter.lint_paths(["src"])
+result.to_dict()                        # same shape as --json
+```
+
+## Development
+
+```bash
+uv venv && uv pip install -e . pytest pyyaml ruff
+pytest
+ruff check src tests && ruff format --check src tests
+lintex check .                          # lintex lints itself
+```
+
+A new rule subclasses `lintex.rules.base.Rule`. It sets `code`, `name`, `summary`, and
+`node_types`, implements `check_node` and/or `check_file`, and is added to `ALL_RULES` in
+`lintex/rules/__init__.py`.
+
+## License
+
+MIT

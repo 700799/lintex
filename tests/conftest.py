@@ -8,6 +8,13 @@ import pytest
 
 from lintex import Config, Violation, lint_source
 
+
+@pytest.fixture(autouse=True)
+def _isolated_ledger(tmp_path, monkeypatch):
+    """Never let tests write to the real per-user ledger directory."""
+    monkeypatch.setenv("LINTEX_LEDGER_DIR", str(tmp_path / "_ledger"))
+
+
 requires_stdlib_names = pytest.mark.skipif(
     not hasattr(sys, "stdlib_module_names"), reason="LX102 needs Python 3.10+"
 )

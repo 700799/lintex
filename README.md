@@ -171,6 +171,46 @@ After each edit, lintex checks the changed file. If it finds problems, it exits 
 prints them to stderr, and Claude Code passes that output back to the model. Errors in the hook
 itself, such as a bad payload or config, never block the agent.
 
+### Session ledger and status line
+
+Every time the Claude Code hook checks an edit, it appends the result to a per-project ledger
+(kept in your user cache directory, never in the repo). Two things read it:
+
+**`lintex statusline`** puts a live health strip in Claude Code's status line while the agent
+works. One block per checked edit in this session (green clean, yellow warnings, red errors),
+then what is still open and how much the agent has already fixed:
+
+```text
+Opus · myapp · lintex ▮▮▮▮▮▮▮▮▮▮  ✖ 1 ▲ 2 · 9 fixed
+```
+
+```bash
+lintex install-hook statusline        # sets statusLine in .claude/settings.json
+```
+
+If you already have a status line script, lintex won't replace it; add
+`lintex statusline --segment` to that script's output instead.
+
+**`lintex report`** is the ledger itself: what the hook caught, what the agent fixed on its next
+edit, and what is still open, per rule.
+
+```text
+lintex ledger · myapp · last 24h
+lintex ▮▮▮▮▮▮▮▮▮▮ ✖ 1 ▲ 2 · 9 fixed
+12 caught across 14 edits of 5 files · 9 fixed by the agent · 3 still open
+
+  LX201 sql-string-interpolation  caught   4  fixed   4  all fixed
+  LX402 swallowed-exception       caught   3  fixed   2  1 open
+  LX301 function-too-long         caught   2  fixed   0  2 open
+  ...
+
+Still open
+  ✖ app/db.py:41  LX402 Exception handler catches Exception and silently discards it.
+```
+
+`--since 7d`, `--all`, `--session ID`, `--json` and `--clear` are available. Set `ledger = false`
+under `[tool.lintex]` to turn recording off, or point `LINTEX_LEDGER_DIR` somewhere else.
+
 ### Git pre-commit
 
 ```bash

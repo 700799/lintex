@@ -49,6 +49,7 @@ DEFAULT_EXCLUDE = (
 )
 
 _TOP_LEVEL_KEYS = {
+    "ledger",
     "select",
     "ignore",
     "enable",
@@ -86,6 +87,8 @@ class Config:
     per_file_ignores: dict[str, list[str]] = field(default_factory=dict)
     severity: dict[str, Severity] = field(default_factory=dict)
     fail_on: Severity = Severity.ERROR
+    #: Whether the Claude Code hook records findings to the session ledger.
+    ledger: bool = True
     rule_options: dict[str, dict[str, Any]] = field(default_factory=dict)
     root: Path = field(default_factory=Path.cwd)
     source: Path | None = None
@@ -130,6 +133,9 @@ class Config:
             cfg.fail_on = Severity.parse(data.get("fail-on", "error"))
         except ValueError as exc:
             raise ConfigError(str(exc)) from None
+        if not isinstance(data.get("ledger", True), bool):
+            raise ConfigError("`ledger` must be true or false")
+        cfg.ledger = data.get("ledger", True)
 
         rules = data.get("rules", {})
         if not isinstance(rules, dict) or not all(isinstance(v, dict) for v in rules.values()):

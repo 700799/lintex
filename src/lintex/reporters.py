@@ -42,6 +42,7 @@ class Style:
 
     def __init__(self, color: bool = False, unicode: bool = True, width: int = 100) -> None:
         self.color = color
+        self.unicode = unicode
         self.sym = _UNICODE if unicode else _ASCII
         self.width = max(60, min(width, 120))
 

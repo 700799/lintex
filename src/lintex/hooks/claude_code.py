@@ -17,6 +17,7 @@ import os
 from pathlib import Path
 from typing import IO, Any
 
+from lintex import ledger
 from lintex.config import ConfigError, load_config
 from lintex.engine import Linter, LintResult
 from lintex.models import Severity
@@ -57,12 +58,25 @@ def run_claude_code_hook(
         stderr.write(f"lintex: configuration error, skipping checks: {exc}\n")
         return 0
     result = LintResult()
+    linted: list[str] = []
     for path in linter.iter_files(files):
         result.files_checked += 1
         try:
             result.violations.extend(linter.lint_file(path, str(path)))
+            linted.append(str(path))
         except OSError:
             continue  # e.g. the file was deleted again
+    if config.ledger and linted:
+        try:
+            ledger.record(
+                config.root,
+                session=str(payload.get("session_id") or ""),
+                tool=str(payload.get("tool_name") or ""),
+                files=linted,
+                violations=result.violations,
+            )
+        except OSError:
+            pass  # bookkeeping must never block the agent
     relevant = [v for v in result.violations if v.severity.rank >= fail_on.rank]
     if not relevant:
         return 0

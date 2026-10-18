@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import stat
 import subprocess
 import sys
@@ -47,6 +48,59 @@ def staged_python_files(root: Path) -> list[str]:
 def staged_content(root: Path, rel_path: str) -> str:
     """The staged (index) version of a file, which is what will actually be committed."""
     return _git(["show", f":{rel_path}"], root).decode("utf-8-sig", errors="replace")
+
+
+def default_base(root: Path) -> str:
+    """The branch to diff against: the remote's default branch, else main/master."""
+    try:
+        ref = _git(["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"], root)
+        if ref.strip():
+            return ref.decode().strip()
+    except GitError:
+        pass
+    for candidate in ("origin/main", "origin/master", "main", "master"):
+        try:
+            _git(["rev-parse", "--verify", "--quiet", candidate], root)
+            return candidate
+        except GitError:
+            continue
+    raise GitError(
+        "cannot work out a base branch to compare with; pass one explicitly, "
+        "e.g. `lintex check --changed=main`"
+    )
+
+
+_HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", re.MULTILINE)
+
+
+def changed_lines(root: Path, base: str, rel_path: str) -> set[int]:
+    """Line numbers in the working-tree file that differ from ``base``."""
+    diff = _git(["diff", "-U0", base, "--", rel_path], root).decode(errors="replace")
+    lines: set[int] = set()
+    for match in _HUNK_RE.finditer(diff):
+        start, count = int(match.group(1)), int(match.group(2) or 1)
+        lines.update(range(start, start + count))
+    return lines
+
+
+def changed_python_files(root: Path, base: str) -> tuple[str, dict[str, set[int] | None]]:
+    """Python files that differ from the merge base with ``base``, and their changed lines.
+
+    Returns ``(resolved_base, {rel_path: changed_lines})`` where ``None`` means
+    the whole file is new (added or untracked) and should be checked in full.
+    """
+    try:
+        merge_base = _git(["merge-base", base, "HEAD"], root).decode().strip()
+    except GitError:
+        merge_base = base  # a bare commit or a ref with no common history
+    out = _git(["diff", "--name-only", "--diff-filter=ACMR", "-z", merge_base, "--"], root)
+    files: dict[str, set[int] | None] = {}
+    for rel in sorted(p for p in out.decode().split("\0") if p.endswith(".py")):
+        files[rel] = changed_lines(root, merge_base, rel)
+    untracked = _git(["ls-files", "--others", "--exclude-standard", "-z"], root)
+    for rel in sorted(p for p in untracked.decode().split("\0") if p.endswith(".py")):
+        files[rel] = None
+    return merge_base[:12] if merge_base != base else base, files
 
 
 def hooks_dir(cwd: str | os.PathLike[str] | None = None) -> Path:

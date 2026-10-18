@@ -27,6 +27,8 @@ from lintex.engine import Linter, LintResult
 from lintex.hooks.claude_code import install_claude_code_hook, run_claude_code_hook
 from lintex.hooks.git import (
     GitError,
+    changed_python_files,
+    default_base,
     install_git_hook,
     repo_root,
     staged_content,
@@ -38,7 +40,7 @@ from lintex.hooks.statusline import (
     render_segment,
     render_statusline,
 )
-from lintex.models import Severity
+from lintex.models import Severity, Violation
 from lintex.reporters import FORMATS, Style, dim_note, render
 from lintex.rules import ALL_RULES, get_rule, is_rule_active
 
@@ -58,40 +60,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=f"lintex {__version__}")
     sub = parser.add_subparsers(dest="command")
 
-    check = sub.add_parser("check", help="lint files or directories (the default command)")
-    check.add_argument("paths", nargs="*", help="files or directories (default: current directory)")
-    check.add_argument(
-        "--format",
-        choices=FORMATS,
-        default=None,
-        help="output style: pretty (default, grouped by file), full (every finding with why and "
-        "fix, for agents), concise (one line per finding), github (Actions annotations), json",
-    )
-    check.add_argument("--json", action="store_true", help="shorthand for --format json")
-    check.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="show the `why` for every finding, not just the first of each rule",
-    )
-    check.add_argument(
-        "--staged",
-        action="store_true",
-        help="lint the staged version of staged .py files (for pre-commit)",
-    )
-    check.add_argument("--config", metavar="PATH", help="explicit config file")
-    check.add_argument("--select", type=_csv, metavar="CODES", help="only run these codes/prefixes")
-    check.add_argument("--ignore", type=_csv, metavar="CODES", help="skip these codes/prefixes")
-    check.add_argument("--enable", type=_csv, metavar="CODES", help="enable opt-in rules")
-    check.add_argument(
-        "--fail-on",
-        choices=["error", "warning"],
-        help="lowest severity that makes the exit status non-zero (default: error)",
-    )
-    check.add_argument("--exit-zero", action="store_true", help="always exit 0")
-    color = check.add_mutually_exclusive_group()
-    color.add_argument("--color", dest="color", action="store_true", default=None)
-    color.add_argument("--no-color", dest="color", action="store_false")
+    _add_check_parser(sub)
 
     rules = sub.add_parser("rules", help="list available rules")
     rules.add_argument("--json", action="store_true")
@@ -123,6 +92,52 @@ def build_parser() -> argparse.ArgumentParser:
         help="lowest severity reported back to the agent (default: warning)",
     )
     return parser
+
+
+def _add_check_parser(sub: argparse._SubParsersAction) -> None:
+    """`check`, the default command."""
+    check = sub.add_parser("check", help="lint files or directories (the default command)")
+    check.add_argument("paths", nargs="*", help="files or directories (default: current directory)")
+    check.add_argument(
+        "--format",
+        choices=FORMATS,
+        default=None,
+        help="output style: pretty (default, grouped by file), full (every finding with why and "
+        "fix, for agents), concise (one line per finding), github (Actions annotations), json",
+    )
+    check.add_argument("--json", action="store_true", help="shorthand for --format json")
+    check.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="show the `why` for every finding, not just the first of each rule",
+    )
+    check.add_argument(
+        "--staged",
+        action="store_true",
+        help="lint the staged version of staged .py files (for pre-commit)",
+    )
+    check.add_argument(
+        "--changed",
+        nargs="?",
+        const="auto",
+        metavar="REF",
+        help="only files changed since REF (default: the base branch), and only findings "
+        "on changed lines; new files are checked in full",
+    )
+    check.add_argument("--config", metavar="PATH", help="explicit config file")
+    check.add_argument("--select", type=_csv, metavar="CODES", help="only run these codes/prefixes")
+    check.add_argument("--ignore", type=_csv, metavar="CODES", help="skip these codes/prefixes")
+    check.add_argument("--enable", type=_csv, metavar="CODES", help="enable opt-in rules")
+    check.add_argument(
+        "--fail-on",
+        choices=["error", "warning"],
+        help="lowest severity that makes the exit status non-zero (default: error)",
+    )
+    check.add_argument("--exit-zero", action="store_true", help="always exit 0")
+    color = check.add_mutually_exclusive_group()
+    color.add_argument("--color", dest="color", action="store_true", default=None)
+    color.add_argument("--no-color", dest="color", action="store_false")
 
 
 def _add_ledger_parsers(sub: argparse._SubParsersAction) -> None:
@@ -194,11 +209,21 @@ def _apply_overrides(config: Config, args: argparse.Namespace) -> Config:
 
 
 def _cmd_check(args: argparse.Namespace) -> int:
-    if args.staged:
+    scope_note = ""
+    if args.staged or args.changed is not None:
         root = repo_root()
         config = _apply_overrides(load_config(root, args.config), args)
         linter = Linter(config)
-        result = _lint_staged(linter, root)
+        if args.staged:
+            result = _lint_staged(linter, root)
+        else:
+            base = default_base(root) if args.changed == "auto" else args.changed
+            result, resolved = _lint_changed(linter, root, base)
+            scope_note = (
+                f"Showing only findings on lines changed since {base}"
+                + (f" (merge base {resolved})" if resolved != base else "")
+                + ". New files are checked in full."
+            )
     else:
         paths = args.paths or ["."]
         config = _apply_overrides(load_config(paths[0], args.config), args)
@@ -208,6 +233,8 @@ def _cmd_check(args: argparse.Namespace) -> int:
     fmt = "json" if args.json else (args.format or "pretty")
     style = Style.detect(sys.stdout, color=args.color)
     print(render(result, fmt, style, verbose=args.verbose))
+    if scope_note and fmt in ("pretty", "full", "concise"):
+        print(dim_note(scope_note, style))
     if fmt == "pretty" and result.violations and config.source is None:
         print(
             dim_note(
@@ -233,6 +260,32 @@ def _lint_staged(linter: Linter, root: Path) -> LintResult:
         result.violations.extend(linter.lint_source(staged_content(root, rel), rel))
     result.duration_ms = (time.perf_counter() - start) * 1000
     return result
+
+
+def _lint_changed(linter: Linter, root: Path, base: str) -> tuple[LintResult, str]:
+    import time
+
+    start = time.perf_counter()
+    resolved, files = changed_python_files(root, base)
+    result = LintResult()
+    for rel, lines in files.items():
+        path = root / rel
+        if linter.config.is_excluded(path) or not path.is_file():
+            continue
+        result.files_checked += 1
+        violations = linter.lint_file(path, rel)
+        if lines is not None:
+            violations = [v for v in violations if _touches(v, lines)]
+        result.violations.extend(violations)
+    result.duration_ms = (time.perf_counter() - start) * 1000
+    return result, resolved
+
+
+def _touches(v: Violation, lines: set[int]) -> bool:
+    end = v.end_line or v.line
+    if end - v.line > 200:  # a whole-module finding: only report it if the module is new
+        return False
+    return any(line in lines for line in range(v.line, end + 1))
 
 
 def _cmd_rules(args: argparse.Namespace) -> int:

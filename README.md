@@ -37,6 +37,30 @@ once per rule so a long report stays readable; pass `-v` to see it every time. O
 on a terminal and falls back to plain ASCII where Unicode or colour isn't available (`NO_COLOR`
 and `FORCE_COLOR` are honoured).
 
+## Where it sits
+
+```mermaid
+flowchart LR
+    subgraph loop["While the agent works"]
+        direction LR
+        A["Agent edits a .py file"] --> H["Claude Code<br/>PostToolUse hook"]
+        H --> L["lintex<br/>one parse, one walk, a few ms"]
+        L -- "findings, each with<br/>why + fix" --> A
+        L --> G[("session ledger")]
+        G --> S["status line<br/>lintex ▮▮▮▮▮ ✖ 1 · 3 fixed"]
+        G --> R["lintex report<br/>caught · fixed · still open"]
+    end
+    subgraph gate["Before code lands"]
+        direction LR
+        C["git commit"] --> P["pre-commit hook<br/>lintex check --staged"]
+        CI["CI"] --> GH["lintex check --changed --format github<br/>annotations on the PR diff"]
+    end
+```
+
+The hook loop is where lintex earns its keep: the agent sees a finding and its fix in the same
+step it made the mistake, so most problems never reach a commit. The commit and CI gates catch
+what slips through and show people only the lines they changed.
+
 - **Fast enough for the agent loop.** One `ast.parse` and one tree walk per file, with rules
   dispatched by node type. The cost is close to parsing alone. The CPython stdlib (~300k lines)
   lints in about 3 seconds on a modest machine, and a single edited file takes a few milliseconds.
@@ -60,6 +84,8 @@ pip install "lintex[yaml]"    # if you want .lintex.yaml configuration
 lintex                          # lint the current directory
 lintex check src/ app.py        # lint specific paths
 lintex check --staged           # lint what is staged in git (the index, not the working tree)
+lintex check --changed          # only files changed since the base branch, only changed lines
+lintex check --changed=HEAD~3   # ...since a specific ref
 lintex check --json             # machine-readable output (same as --format json)
 lintex check --format concise   # one `path:line:col: CODE message` per finding, for editors/grep
 lintex check --format github    # GitHub Actions annotations, shown inline on the PR diff
@@ -73,6 +99,12 @@ lintex explain LX101            # documentation for one rule
 
 Exit status: `0` means clean (or only findings below `fail-on`), `1` means violations, `2` means
 a usage or configuration error.
+
+`--changed` is how to adopt lintex on a codebase that already has findings: it compares the
+working tree with the merge base of the default branch (`origin/HEAD`, else `main`/`master`),
+lints only the Python files that differ, and reports only findings that touch a changed line.
+New and untracked files are checked in full. Pass a ref (`--changed=main`, `--changed=HEAD~3`)
+to choose the base.
 
 ## Rules
 

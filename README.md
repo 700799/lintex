@@ -136,6 +136,25 @@ Hallucination rules skip code inside compatibility guards, such as `try: ... exc
 and `if sys.version_info ...` / `sys.platform` / `hasattr(...)`. LX102 imports only stdlib
 modules and never third-party code. It checks against the Python version that runs lintex.
 
+### Where the API knowledge comes from
+
+LX101's list of removed, deprecated and Python-2-only names lives in two data files under
+`lintex/knowledge/`, loaded once per run (about a millisecond):
+
+- **`curated.toml`**: hand-written entries with specific fixes (`openai.ChatCompletion`,
+  `pydantic.BaseSettings`, `numpy.float`, PEP 594 modules, ...). Adding one is a five-line TOML
+  entry with a `fix`; no Python required.
+- **`typeshed.json`**: generated from [typeshed](https://github.com/python/typeshed), the type
+  stubs mypy and pyright run on. `stdlib/VERSIONS` gives every stdlib module removal, and
+  `@deprecated` decorators give deprecated functions and methods with the upstream's own
+  message. Regenerate it with `python -m lintex.knowledge.sync --typeshed /path/to/typeshed`
+  (or `--from-mypy` for the stdlib part). Curated entries win where both know a name.
+
+Removals are judged against the project's minimum Python: lintex reads `requires-python` from
+`pyproject.toml` (or `target-version = "py311"` under `[tool.lintex]`). `import cgi` is an
+error when the minimum is 3.13 or later, and a warning ("still exists on your minimum, breaks on
+3.13+") before that. Without either, the interpreter running lintex is the target.
+
 ### Suppressing
 
 ```python

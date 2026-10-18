@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import fnmatch
 import os
+import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -50,6 +51,7 @@ DEFAULT_EXCLUDE = (
 
 _TOP_LEVEL_KEYS = {
     "ledger",
+    "target-version",
     "select",
     "ignore",
     "enable",
@@ -89,6 +91,9 @@ class Config:
     fail_on: Severity = Severity.ERROR
     #: Whether the Claude Code hook records findings to the session ledger.
     ledger: bool = True
+    #: The project's minimum Python (major, minor): `target-version`, else
+    #: derived from `[project] requires-python`, else None (= the interpreter).
+    target_version: tuple[int, int] | None = None
     rule_options: dict[str, dict[str, Any]] = field(default_factory=dict)
     root: Path = field(default_factory=Path.cwd)
     source: Path | None = None
@@ -136,6 +141,14 @@ class Config:
         if not isinstance(data.get("ledger", True), bool):
             raise ConfigError("`ledger` must be true or false")
         cfg.ledger = data.get("ledger", True)
+        if "target-version" in data:
+            cfg.target_version = parse_target_version(str(data["target-version"]))
+            if cfg.target_version is None:
+                raise ConfigError(
+                    f"`target-version` must look like 'py311' or '3.11', got {data['target-version']!r}"
+                )
+        else:
+            cfg.target_version = requires_python_minimum(cfg.root)
 
         rules = data.get("rules", {})
         if not isinstance(rules, dict) or not all(isinstance(v, dict) for v in rules.values()):
@@ -179,6 +192,35 @@ def _matches_any(rel: str, patterns: list[str]) -> bool:
         if "/" not in pat and any(fnmatch.fnmatchcase(part, pat) for part in parts):
             return True
     return False
+
+
+# -- target Python version ---------------------------------------------------
+
+_TARGET_RE = re.compile(r"^\s*(?:py|python)?\s*(\d)\.?(\d{1,2})\s*$", re.IGNORECASE)
+_REQUIRES_RE = re.compile(r"(>=?|~=|==)\s*(\d+)\.(\d+)")
+
+
+def parse_target_version(text: str) -> tuple[int, int] | None:
+    match = _TARGET_RE.match(text)
+    return (int(match.group(1)), int(match.group(2))) if match else None
+
+
+def requires_python_minimum(root: Path) -> tuple[int, int] | None:
+    """The lowest Python allowed by ``[project] requires-python`` in ``root/pyproject.toml``."""
+    pyproject = root / "pyproject.toml"
+    if not pyproject.is_file():
+        return None
+    try:
+        data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+    except (OSError, tomllib.TOMLDecodeError):
+        return None
+    spec = (data.get("project") or {}).get("requires-python")
+    if not isinstance(spec, str):
+        return None
+    for op, major, minor in _REQUIRES_RE.findall(spec):
+        version = (int(major), int(minor))
+        return (version[0], version[1] + 1) if op == ">" else version
+    return None
 
 
 # -- discovery ------------------------------------------------------------
@@ -243,6 +285,7 @@ def load_config(
     found = find_config_file(start_path)
     if found is None:
         root = start_path.resolve()
-        return Config(root=root.parent if root.is_file() else root)
+        root = root.parent if root.is_file() else root
+        return Config(root=root, target_version=requires_python_minimum(root))
     path, data = found
     return Config.from_dict(data, root=path.parent, source=path)

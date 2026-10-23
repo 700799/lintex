@@ -40,6 +40,7 @@ lintex = "lintex.cli:main"
 [project.urls]
 Homepage = "https://github.com/700799/lintex"
 Issues = "https://github.com/700799/lintex/issues"
+Changelog = "https://github.com/700799/lintex/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 dev = ["pytest>=7", "pyyaml>=5.4", "ruff>=0.5"]

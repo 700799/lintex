@@ -1,11 +1,21 @@
 name: Release
 
-# Publishes to PyPI when a version tag (e.g. v0.1.0) is pushed. Uses PyPI
-# trusted publishing: configure a trusted publisher for this repository and
-# the `pypi` environment at https://pypi.org/manage/account/publishing/.
+# Publishes to PyPI when a version tag (e.g. v0.1.0) is pushed, or to TestPyPI
+# (or PyPI) on demand from the Actions tab. Uses trusted publishing, so no
+# tokens are stored: configure a trusted publisher for this repository and
+# workflow at https://pypi.org/manage/account/publishing/ (environment `pypi`)
+# and, for rehearsals, at https://test.pypi.org/manage/account/publishing/
+# (environment `testpypi`).
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Where to publish"
+        type: choice
+        options: [testpypi, pypi]
+        default: testpypi
 
 jobs:
   build:
@@ -15,8 +25,24 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - run: python -m pip install build
+      - run: python -m pip install build twine
+      - name: Check the tag matches the package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version=$(python -c "import re,pathlib;print(re.search(r'__version__ = \"([^\"]+)\"', pathlib.Path('src/lintex/__init__.py').read_text()).group(1))")
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$version" != "$tag" ]; then
+            echo "tag v$tag does not match __version__ $version" >&2
+            exit 1
+          fi
       - run: python -m build
+      - run: python -m twine check --strict dist/*
+      - name: Smoke-test the wheel in a clean environment
+        run: |
+          python -m venv /tmp/smoke && /tmp/smoke/bin/pip install -q dist/*.whl
+          /tmp/smoke/bin/lintex --version
+          echo 'from collections import Mapping' > /tmp/smoke/x.py
+          /tmp/smoke/bin/lintex check /tmp/smoke/x.py --format concise --no-color; test $? -eq 1
       - uses: actions/upload-artifact@v4
         with:
           name: dist
@@ -25,7 +51,7 @@ jobs:
   publish:
     needs: build
     runs-on: ubuntu-latest
-    environment: pypi
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target || 'pypi' }}
     permissions:
       id-token: write
     steps:
@@ -33,4 +59,11 @@ jobs:
         with:
           name: dist
           path: dist/
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish to TestPyPI
+        if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+      - name: Publish to PyPI
+        if: github.event_name != 'workflow_dispatch' || inputs.target == 'pypi'
+        uses: pypa/gh-action-pypi-publish@release/v1

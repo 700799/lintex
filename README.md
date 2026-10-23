@@ -1,5 +1,10 @@
 # lintex
 
+[![PyPI](https://img.shields.io/pypi/v/lintex.svg)](https://pypi.org/project/lintex/)
+[![Python](https://img.shields.io/pypi/pyversions/lintex.svg)](https://pypi.org/project/lintex/)
+[![CI](https://github.com/700799/lintex/actions/workflows/ci.yml/badge.svg)](https://github.com/700799/lintex/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **A fast linter for Python written by LLM coding agents.** lintex catches the mistakes agents
 actually make, such as hallucinated imports, removed APIs, SQL built with f-strings,
 `except Exception: pass`, and `# ... rest of the code unchanged`. It reports each one with an

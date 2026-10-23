@@ -1,0 +1,1248 @@
+{
+ "source": {
+  "name": "typeshed",
+  "via": "mypy 2.4.0 bundled typeshed",
+  "generated": "2026-10-18T20:38:18+00:00",
+  "latest_python": "3.15",
+  "entries": 210
+ },
+ "api": [
+  {
+   "name": "aifc",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "asynchat",
+   "status": "removed",
+   "version": "3.12",
+   "fix": "The module no longer exists on Python 3.12+. See \"What's New in Python 3.12\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "asyncore",
+   "status": "removed",
+   "version": "3.12",
+   "fix": "The module no longer exists on Python 3.12+. See \"What's New in Python 3.12\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "audioop",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "binhex",
+   "status": "removed",
+   "version": "3.11",
+   "fix": "The module no longer exists on Python 3.11+. See \"What's New in Python 3.11\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "cgi",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "cgitb",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "chunk",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "crypt",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "distutils",
+   "status": "removed",
+   "version": "3.12",
+   "fix": "The module no longer exists on Python 3.12+. See \"What's New in Python 3.12\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "distutils.command.bdist_msi",
+   "status": "removed",
+   "version": "3.11",
+   "fix": "The module no longer exists on Python 3.11+. See \"What's New in Python 3.11\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "imghdr",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "imp",
+   "status": "removed",
+   "version": "3.12",
+   "fix": "The module no longer exists on Python 3.12+. See \"What's New in Python 3.12\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "lib2to3",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "mailcap",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "msilib",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "nis",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "nntplib",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "ossaudiodev",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "pipes",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "smtpd",
+   "status": "removed",
+   "version": "3.12",
+   "fix": "The module no longer exists on Python 3.12+. See \"What's New in Python 3.12\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "sndhdr",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "spwd",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "sre_compile",
+   "status": "removed",
+   "version": "3.15",
+   "fix": "The module no longer exists on Python 3.15+. See \"What's New in Python 3.15\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "sre_constants",
+   "status": "removed",
+   "version": "3.15",
+   "fix": "The module no longer exists on Python 3.15+. See \"What's New in Python 3.15\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "sre_parse",
+   "status": "removed",
+   "version": "3.15",
+   "fix": "The module no longer exists on Python 3.15+. See \"What's New in Python 3.15\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "sunau",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "telnetlib",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "tkinter.tix",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "uu",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "xdrlib",
+   "status": "removed",
+   "version": "3.13",
+   "fix": "The module no longer exists on Python 3.13+. See \"What's New in Python 3.13\" for the replacement, or vendor the functionality."
+  },
+  {
+   "name": "abc.abstractclassmethod",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3. Use `@classmethod` stacked on top of `@abstractmethod` instead.",
+   "version": "3.3"
+  },
+  {
+   "name": "abc.abstractproperty",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3. Use `@property` stacked on top of `@abstractmethod` instead.",
+   "version": "3.3"
+  },
+  {
+   "name": "abc.abstractstaticmethod",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3. Use `@staticmethod` stacked on top of `@abstractmethod` instead.",
+   "version": "3.3"
+  },
+  {
+   "name": "argparse.FileType",
+   "status": "deprecated",
+   "fix": "Deprecated; may leave files open. Open files after parsing arguments instead."
+  },
+  {
+   "name": "ast.AugLoad",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Unused in Python 3.",
+   "version": "3.9"
+  },
+  {
+   "name": "ast.AugStore",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Unused in Python 3.",
+   "version": "3.9"
+  },
+  {
+   "name": "ast.Bytes",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `ast.Constant` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.Constant.n",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `value` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.Constant.s",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `value` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.Ellipsis",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `ast.Constant` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.ExtSlice",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Use `ast.Tuple` instead.",
+   "version": "3.9"
+  },
+  {
+   "name": "ast.Index",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Use the index value directly instead.",
+   "version": "3.9"
+  },
+  {
+   "name": "ast.NameConstant",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `ast.Constant` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.NodeVisitor.visit_Bytes",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `visit_Constant` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.NodeVisitor.visit_Ellipsis",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `visit_Constant` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.NodeVisitor.visit_NameConstant",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `visit_Constant` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.NodeVisitor.visit_Num",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `visit_Constant` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.NodeVisitor.visit_Str",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `visit_Constant` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.Num",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `ast.Constant` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.Param",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Unused in Python 3.",
+   "version": "3.9"
+  },
+  {
+   "name": "ast.Str",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.14. Use `ast.Constant` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "ast.Suite",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Unused in Python 3.",
+   "version": "3.9"
+  },
+  {
+   "name": "ast.slice",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9.",
+   "version": "3.9"
+  },
+  {
+   "name": "asyncio.coroutines.coroutine",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.8; removed in Python 3.11. Use `async def` instead.",
+   "version": "3.8"
+  },
+  {
+   "name": "asyncio.events.get_child_watcher",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.14.",
+   "version": "3.14"
+  },
+  {
+   "name": "asyncio.events.get_event_loop_policy",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.16.",
+   "version": "3.16"
+  },
+  {
+   "name": "asyncio.events.set_child_watcher",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.14.",
+   "version": "3.14"
+  },
+  {
+   "name": "asyncio.events.set_event_loop_policy",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.16.",
+   "version": "3.16"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.accept",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.bind",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.close",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.connect",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.connect_ex",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.detach",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.ioctl",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.listen",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.makefile",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.recv",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.recv_into",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.recvfrom",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.recvfrom_into",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.recvmsg",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.recvmsg_into",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.send",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.sendall",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.sendfile",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.sendmsg",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.sendmsg_afalg",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.sendto",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.set_inheritable",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "asyncio.trsock.TransportSocket.share",
+   "status": "deprecated",
+   "fix": "Removed in Python 3.11.",
+   "version": "3.11"
+  },
+  {
+   "name": "binascii.a2b_hqx",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9; removed in Python 3.11.",
+   "version": "3.9"
+  },
+  {
+   "name": "binascii.b2a_hqx",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9; removed in Python 3.11.",
+   "version": "3.9"
+  },
+  {
+   "name": "binascii.rlecode_hqx",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9; removed in Python 3.11.",
+   "version": "3.9"
+  },
+  {
+   "name": "binascii.rledecode_hqx",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9; removed in Python 3.11.",
+   "version": "3.9"
+  },
+  {
+   "name": "codecs.open",
+   "status": "deprecated",
+   "fix": "Deprecated. Use `open()` instead."
+  },
+  {
+   "name": "configparser.LegacyInterpolation",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.2; removed in Python 3.13. Use `BasicInterpolation` or `ExtendedInterpolation` instead.",
+   "version": "3.2"
+  },
+  {
+   "name": "configparser.ParsingError.filename",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.2; removed in Python 3.12. Use `source` instead.",
+   "version": "3.2"
+  },
+  {
+   "name": "configparser.RawConfigParser.readfp",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.2; removed in Python 3.12. Use `parser.read_file()` instead.",
+   "version": "3.2"
+  },
+  {
+   "name": "configparser.SafeConfigParser",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.2; removed in Python 3.12. Use `ConfigParser` instead.",
+   "version": "3.2"
+  },
+  {
+   "name": "ctypes.ARRAY",
+   "status": "deprecated",
+   "fix": "Soft deprecated. Use multiplication instead."
+  },
+  {
+   "name": "ctypes.SetPointerType",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.15.",
+   "version": "3.15"
+  },
+  {
+   "name": "datetime.datetime.utcfromtimestamp",
+   "status": "deprecated",
+   "fix": "Use timezone-aware objects to represent datetimes in UTC; e.g. by calling .fromtimestamp(datetime.timezone.utc)"
+  },
+  {
+   "name": "datetime.datetime.utcnow",
+   "status": "deprecated",
+   "fix": "Use timezone-aware objects to represent datetimes in UTC; e.g. by calling .now(datetime.timezone.utc)"
+  },
+  {
+   "name": "fileinput.hook_encoded",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Use `fileinput.input` or `fileinput.FileInput` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "gettext.NullTranslations.lgettext",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.8; removed in Python 3.11. Use `gettext()` instead.",
+   "version": "3.8"
+  },
+  {
+   "name": "gettext.NullTranslations.lngettext",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.8; removed in Python 3.11. Use `ngettext()` instead.",
+   "version": "3.8"
+  },
+  {
+   "name": "gettext.NullTranslations.output_charset",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.8; removed in Python 3.11.",
+   "version": "3.8"
+  },
+  {
+   "name": "gettext.NullTranslations.set_output_charset",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.8; removed in Python 3.11.",
+   "version": "3.8"
+  },
+  {
+   "name": "gettext.bind_textdomain_codeset",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.8; removed in Python 3.11. Use `bindtextdomain()` instead.",
+   "version": "3.8"
+  },
+  {
+   "name": "gettext.ldgettext",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.8; removed in Python 3.11. Use `dgettext()` instead.",
+   "version": "3.8"
+  },
+  {
+   "name": "gettext.ldngettext",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.8; removed in Python 3.11. Use `dngettext()` instead.",
+   "version": "3.8"
+  },
+  {
+   "name": "gettext.lgettext",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.8; removed in Python 3.11. Use `gettext()` instead.",
+   "version": "3.8"
+  },
+  {
+   "name": "gettext.lngettext",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.8; removed in Python 3.11. Use `ngettext()` instead.",
+   "version": "3.8"
+  },
+  {
+   "name": "glob.glob0",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10; removed in Python 3.15. Use `glob.glob()` with the *root_dir* argument instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "glob.glob1",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10; removed in Python 3.15. Use `glob.glob()` with the *root_dir* argument instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "gzip.GzipFile.filename",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 2.6; removed in Python 3.12. Use `name` attribute instead.",
+   "version": "3.12"
+  },
+  {
+   "name": "http.client.HTTPResponse.getcode",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Use `HTTPResponse.status` attribute instead.",
+   "version": "3.9"
+  },
+  {
+   "name": "http.client.HTTPResponse.geturl",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Use `HTTPResponse.url` attribute instead.",
+   "version": "3.9"
+  },
+  {
+   "name": "http.client.HTTPResponse.info",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Use `HTTPResponse.headers` attribute instead.",
+   "version": "3.9"
+  },
+  {
+   "name": "http.cookies.BaseCookie.js_output",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.19. Use `output()` instead.",
+   "version": "3.19"
+  },
+  {
+   "name": "http.cookies.Morsel.js_output",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.19. Use `output()` instead.",
+   "version": "3.19"
+  },
+  {
+   "name": "http.server.CGIHTTPRequestHandler",
+   "status": "deprecated",
+   "fix": "Deprecated and unsafe; removed in Python 3.15.",
+   "version": "3.15"
+  },
+  {
+   "name": "imaplib.IMAP4.file",
+   "status": "deprecated",
+   "fix": "IMAP4.file is unsupported, can cause errors, and may be removed."
+  },
+  {
+   "name": "imaplib.IMAP4_SSL.file",
+   "status": "deprecated",
+   "fix": "IMAP4_SSL.file is unsupported, can cause errors, and may be removed."
+  },
+  {
+   "name": "imaplib.IMAP4_stream.file",
+   "status": "deprecated",
+   "fix": "IMAP4_stream.file is unsupported, can cause errors, and may be removed."
+  },
+  {
+   "name": "importlib.abc.FileLoader.load_module",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10; removed in Python 3.15. Use `exec_module()` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "importlib.abc.Finder",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3; removed in Python 3.12. Use `MetaPathFinder` or `PathEntryFinder` instead.",
+   "version": "3.3"
+  },
+  {
+   "name": "importlib.abc.MetaPathFinder.find_module",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.4; removed in Python 3.12. Use `MetaPathFinder.find_spec()` instead.",
+   "version": "3.4"
+  },
+  {
+   "name": "importlib.abc.PathEntryFinder.find_loader",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.4; removed in Python 3.12. Use `find_spec()` instead.",
+   "version": "3.4"
+  },
+  {
+   "name": "importlib.abc.PathEntryFinder.find_module",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.4; removed in Python 3.12. Use `PathEntryFinder.find_spec()` instead.",
+   "version": "3.4"
+  },
+  {
+   "name": "importlib.abc.ResourceLoader",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.7. Use `importlib.resources.abc.TraversableResources` instead.",
+   "version": "3.7"
+  },
+  {
+   "name": "importlib.abc.SourceLoader.path_mtime",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3. Use `importlib.resources.abc.SourceLoader.path_stats` instead.",
+   "version": "3.3"
+  },
+  {
+   "name": "importlib.find_loader",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.4; removed in Python 3.12. Use `importlib.util.find_spec()` instead.",
+   "version": "3.4"
+  },
+  {
+   "name": "importlib.metadata.SelectableGroups",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10; removed in Python 3.12. Use `select` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "importlib.resources.abc.ResourceReader",
+   "status": "deprecated",
+   "fix": "Deprecated. Use `importlib.resources.abc.TraversableResources` instead."
+  },
+  {
+   "name": "importlib.resources.contents",
+   "status": "deprecated",
+   "fix": "Deprecated; limited resource support. Use `files(anchor).iterdir()`."
+  },
+  {
+   "name": "importlib.util.module_for_loader",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.4; removed in Python 3.12. `__name__`, `__package__` and `__loader__` are now set automatically.",
+   "version": "3.4"
+  },
+  {
+   "name": "importlib.util.set_loader",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.4; removed in Python 3.12. `__name__`, `__package__` and `__loader__` are now set automatically.",
+   "version": "3.4"
+  },
+  {
+   "name": "importlib.util.set_package",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.4; removed in Python 3.12. `__name__`, `__package__` and `__loader__` are now set automatically.",
+   "version": "3.4"
+  },
+  {
+   "name": "inspect.ArgSpec",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.0; removed in Python 3.11.",
+   "version": "3.0"
+  },
+  {
+   "name": "inspect.formatargspec",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.5; removed in Python 3.11. Use `inspect.signature()` and the `Signature` class instead.",
+   "version": "3.5"
+  },
+  {
+   "name": "inspect.getargspec",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.0; removed in Python 3.11. Use `inspect.signature()` instead.",
+   "version": "3.0"
+  },
+  {
+   "name": "inspect.getcallargs",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.5. Use `Signature.bind` and `Signature.bind_partial` instead.",
+   "version": "3.5"
+  },
+  {
+   "name": "locale.format",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.7; removed in Python 3.12. Use `locale.format_string()` instead.",
+   "version": "3.7"
+  },
+  {
+   "name": "locale.resetlocale",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.13. Use `locale.setlocale(locale.LC_ALL, '')` instead.",
+   "version": "3.13"
+  },
+  {
+   "name": "logging.Logger.warn",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3. Use `Logger.warning()` instead.",
+   "version": "3.3"
+  },
+  {
+   "name": "logging.LoggerAdapter.warn",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3. Use `LoggerAdapter.warning()` instead.",
+   "version": "3.3"
+  },
+  {
+   "name": "logging.warn",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3. Use `warning()` instead.",
+   "version": "3.3"
+  },
+  {
+   "name": "nturl2path.pathname2url",
+   "status": "deprecated",
+   "fix": "Deprecated; use `urllib.request` file-URL helpers instead."
+  },
+  {
+   "name": "nturl2path.url2pathname",
+   "status": "deprecated",
+   "fix": "Deprecated; use `urllib.request` file-URL helpers instead."
+  },
+  {
+   "name": "os.popen",
+   "status": "deprecated",
+   "fix": "Soft deprecated. Use the subprocess module instead."
+  },
+  {
+   "name": "os.spawnl",
+   "status": "deprecated",
+   "fix": "Soft deprecated. Use the subprocess module instead."
+  },
+  {
+   "name": "os.spawnle",
+   "status": "deprecated",
+   "fix": "Soft deprecated. Use the subprocess module instead."
+  },
+  {
+   "name": "os.spawnlp",
+   "status": "deprecated",
+   "fix": "Soft deprecated. Use the subprocess module instead."
+  },
+  {
+   "name": "os.spawnlpe",
+   "status": "deprecated",
+   "fix": "Soft deprecated. Use the subprocess module instead."
+  },
+  {
+   "name": "os.spawnv",
+   "status": "deprecated",
+   "fix": "Soft deprecated. Use the subprocess module instead."
+  },
+  {
+   "name": "os.spawnve",
+   "status": "deprecated",
+   "fix": "Soft deprecated. Use the subprocess module instead."
+  },
+  {
+   "name": "os.spawnvp",
+   "status": "deprecated",
+   "fix": "Soft deprecated. Use the subprocess module instead."
+  },
+  {
+   "name": "os.spawnvpe",
+   "status": "deprecated",
+   "fix": "Soft deprecated. Use the subprocess module instead."
+  },
+  {
+   "name": "pathlib.Path.link_to",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10; removed in Python 3.12. Use `hardlink_to()` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "pathlib.PurePath.as_uri",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.19. Use `Path.as_uri()` instead.",
+   "version": "3.19"
+  },
+  {
+   "name": "pdb.Pdb.curframe_locals",
+   "status": "deprecated",
+   "fix": "The frame locals reference is no longer cached. Use 'curframe.f_locals' instead."
+  },
+  {
+   "name": "pkgutil.ImpImporter",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3; removed in Python 3.12. Use the `importlib` module instead.",
+   "version": "3.3"
+  },
+  {
+   "name": "pkgutil.ImpLoader",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3; removed in Python 3.12. Use the `importlib` module instead.",
+   "version": "3.3"
+  },
+  {
+   "name": "pkgutil.find_loader",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.14. Use `importlib.util.find_spec()` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "pkgutil.get_loader",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.14. Use `importlib.util.find_spec()` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "platform.java_ver",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.15.",
+   "version": "3.15"
+  },
+  {
+   "name": "pty.master_open",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.14. Use `openpty()` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "pty.slave_open",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.14. Use `openpty()` instead.",
+   "version": "3.14"
+  },
+  {
+   "name": "pydoc.ispackage",
+   "status": "deprecated",
+   "fix": "Deprecated."
+  },
+  {
+   "name": "re.template",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.13. Use `re.compile()` instead.",
+   "version": "3.13"
+  },
+  {
+   "name": "smtpd.MailmanProxy",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9; removed in Python 3.11.",
+   "version": "3.9"
+  },
+  {
+   "name": "sqlite3.dbapi2.enable_shared_cache",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10; removed in Python 3.12. Open database in URI mode using `cache=shared` parameter instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "ssl.SSLContext.set_npn_protocols",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Use ALPN instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "ssl.SSLObject.selected_npn_protocol",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Use ALPN instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "ssl.SSLSocket.read",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.6. Use `SSLSocket.recv` method instead.",
+   "version": "3.6"
+  },
+  {
+   "name": "ssl.SSLSocket.selected_npn_protocol",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Use ALPN instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "ssl.SSLSocket.write",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.6. Use `SSLSocket.send` method instead.",
+   "version": "3.6"
+  },
+  {
+   "name": "ssl.match_hostname",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.7; removed in Python 3.12.",
+   "version": "3.7"
+  },
+  {
+   "name": "ssl.wrap_socket",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.7; removed in Python 3.12. Use `SSLContext.wrap_socket()` instead.",
+   "version": "3.7"
+  },
+  {
+   "name": "symtable.Class.get_methods",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.16.",
+   "version": "3.16"
+  },
+  {
+   "name": "tarfile.TarInfo.tarfile",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.16.",
+   "version": "3.16"
+  },
+  {
+   "name": "threading.Condition.notifyAll",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Use `notify_all()` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "threading.Event.isSet",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Use `is_set()` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "threading.Thread.getName",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Read the `name` attribute instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "threading.Thread.isDaemon",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Read the `daemon` attribute instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "threading.Thread.setDaemon",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Set the `daemon` attribute instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "threading.Thread.setName",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Set the `name` attribute instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "threading.activeCount",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Use `active_count()` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "threading.currentThread",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10. Use `current_thread()` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "tkinter.Tk.split",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9; removed in Python 3.11. Use `splitlist()` instead.",
+   "version": "3.9"
+  },
+  {
+   "name": "tkinter.Variable.trace",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.17. Use `trace_add()` instead.",
+   "version": "3.17"
+  },
+  {
+   "name": "tkinter.Variable.trace_variable",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.17. Use `trace_add()` instead.",
+   "version": "3.17"
+  },
+  {
+   "name": "tkinter.Variable.trace_vdelete",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.17. Use `trace_remove()` instead.",
+   "version": "3.17"
+  },
+  {
+   "name": "tkinter.Variable.trace_vinfo",
+   "status": "deprecated",
+   "fix": "Deprecated; will be removed in Python 3.17. Use `trace_info()` instead.",
+   "version": "3.17"
+  },
+  {
+   "name": "traceback.TracebackException.exc_type",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.13. Use `exc_type_str` instead.",
+   "version": "3.13"
+  },
+  {
+   "name": "turtle.RawTurtle.settiltangle",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.1; removed in Python 3.13. Use `tiltangle()` instead.",
+   "version": "3.1"
+  },
+  {
+   "name": "turtle.settiltangle",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.1; removed in Python 3.13. Use `tiltangle()` instead.",
+   "version": "3.1"
+  },
+  {
+   "name": "types.CodeType.co_lnotab",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10; removed in Python 3.15. Use `CodeType.co_lines()` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "typing.no_type_check_decorator",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.15.",
+   "version": "3.15"
+  },
+  {
+   "name": "unittest.loader.findTestCases",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.13.",
+   "version": "3.13"
+  },
+  {
+   "name": "unittest.loader.getTestCaseNames",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.13.",
+   "version": "3.13"
+  },
+  {
+   "name": "unittest.loader.makeSuite",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.13.",
+   "version": "3.13"
+  },
+  {
+   "name": "unittest.main.TestProgram.usageExit",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.13.",
+   "version": "3.13"
+  },
+  {
+   "name": "urllib.request.FancyURLopener",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3; removed in Python 3.14. Use newer `urlopen` functions and methods.",
+   "version": "3.3"
+  },
+  {
+   "name": "urllib.request.URLopener",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.3; removed in Python 3.14. Use newer `urlopen` functions and methods.",
+   "version": "3.3"
+  },
+  {
+   "name": "urllib.response.addinfourl.getcode",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Use `addinfourl.status` attribute instead.",
+   "version": "3.9"
+  },
+  {
+   "name": "urllib.response.addinfourl.geturl",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Use `addinfourl.url` attribute instead.",
+   "version": "3.9"
+  },
+  {
+   "name": "urllib.response.addinfourl.info",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.9. Use `addinfourl.headers` attribute instead.",
+   "version": "3.9"
+  },
+  {
+   "name": "wave.Wave_read.getmark",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.15.",
+   "version": "3.15"
+  },
+  {
+   "name": "wave.Wave_read.getmarkers",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.15.",
+   "version": "3.15"
+  },
+  {
+   "name": "wave.Wave_write.getmark",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.15.",
+   "version": "3.15"
+  },
+  {
+   "name": "wave.Wave_write.getmarkers",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.15.",
+   "version": "3.15"
+  },
+  {
+   "name": "wave.Wave_write.setmark",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.15.",
+   "version": "3.15"
+  },
+  {
+   "name": "webbrowser.MacOSX",
+   "status": "deprecated",
+   "fix": "Deprecated; removed in Python 3.13. Use `MacOSXOSAScript` instead.",
+   "version": "3.13"
+  },
+  {
+   "name": "zipimport.zipimporter.find_loader",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10; removed in Python 3.12. Use `find_spec()` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "zipimport.zipimporter.find_module",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10; removed in Python 3.12. Use `find_spec()` instead.",
+   "version": "3.10"
+  },
+  {
+   "name": "zipimport.zipimporter.load_module",
+   "status": "deprecated",
+   "fix": "Deprecated since Python 3.10; removed in Python 3.15. Use `exec_module()` instead.",
+   "version": "3.10"
+  }
+ ]
+}

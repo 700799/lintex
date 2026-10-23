@@ -1,0 +1,7 @@
+- id: lintex
+  name: lintex
+  description: Lint Python code written by LLM coding agents.
+  entry: lintex check
+  language: python
+  types: [python]
+  require_serial: false

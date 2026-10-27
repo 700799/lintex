@@ -42,7 +42,11 @@ jobs:
           python -m venv /tmp/smoke && /tmp/smoke/bin/pip install -q dist/*.whl
           /tmp/smoke/bin/lintex --version
           echo 'from collections import Mapping' > /tmp/smoke/x.py
-          /tmp/smoke/bin/lintex check /tmp/smoke/x.py --format concise --no-color; test $? -eq 1
+          # lintex exits 1 when it finds something, which is what we expect here.
+          # Capture the status so `bash -e` (the Actions default) doesn't abort on it.
+          status=0
+          /tmp/smoke/bin/lintex check /tmp/smoke/x.py --format concise --no-color || status=$?
+          test "$status" -eq 1
       - uses: actions/upload-artifact@v4
         with:
           name: dist

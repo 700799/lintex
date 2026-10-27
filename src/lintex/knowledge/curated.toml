@@ -1,0 +1,742 @@
+# Hand-curated API knowledge for LX101 (hallucinated-api).
+#
+# Each [[api]] is a dotted name an agent might produce from stale training data.
+#   status  = "removed" | "deprecated" | "py2"
+#   version = the Python (or package) version where it was removed/deprecated
+#   package = distribution name for third-party APIs (default: "python")
+#   fix     = what to write instead - specific, copy-pasteable, one or two lines
+#   message = optional override for the "`name` <message>." predicate
+#
+# [[method]] entries match a bare method name on any receiver (`x.iteritems()`),
+# so keep them to names that are wrong everywhere.
+#
+# [[family]] expands one fix template over many names.
+#
+# Stdlib module removals and @deprecated stubs are generated into typeshed.json
+# by `python -m lintex.knowledge.sync`; add an entry here only to give a better
+# fix than the generic one (curated entries override generated ones).
+
+# -- Python 2 holdovers --------------------------------------------------------
+
+[[api]]
+name = "sys.maxint"
+status = "py2"
+fix = "Use `sys.maxsize`."
+
+[[api]]
+name = "os.getcwdu"
+status = "py2"
+fix = "Use `os.getcwd()`."
+
+[[api]]
+name = "string.letters"
+status = "py2"
+fix = "Use `string.ascii_letters`."
+
+[[api]]
+name = "string.lowercase"
+status = "py2"
+fix = "Use `string.ascii_lowercase`."
+
+[[api]]
+name = "string.uppercase"
+status = "py2"
+fix = "Use `string.ascii_uppercase`."
+
+[[api]]
+name = "string.maketrans"
+status = "py2"
+fix = "Use `str.maketrans`."
+
+[[api]]
+name = "itertools.izip"
+status = "py2"
+fix = "Use the builtin `zip`."
+
+[[api]]
+name = "itertools.imap"
+status = "py2"
+fix = "Use the builtin `map`."
+
+[[api]]
+name = "itertools.ifilter"
+status = "py2"
+fix = "Use the builtin `filter`."
+
+[[api]]
+name = "itertools.izip_longest"
+status = "py2"
+fix = "Use `itertools.zip_longest`."
+
+[[api]]
+name = "urllib.urlencode"
+status = "py2"
+fix = "Use `urllib.parse.urlencode`."
+
+[[api]]
+name = "urllib.quote"
+status = "py2"
+fix = "Use `urllib.parse.quote`."
+
+[[api]]
+name = "urllib.unquote"
+status = "py2"
+fix = "Use `urllib.parse.unquote`."
+
+[[api]]
+name = "urllib.urlopen"
+status = "py2"
+fix = "Use `urllib.request.urlopen` (or `requests`/`httpx`)."
+
+[[api]]
+name = "urllib2"
+status = "py2"
+fix = "Use `urllib.request` / `urllib.error` (or `requests`/`httpx`)."
+
+[[api]]
+name = "urlparse"
+status = "py2"
+fix = "Use `urllib.parse`."
+
+[[api]]
+name = "ConfigParser"
+status = "py2"
+fix = "Use `configparser`."
+
+[[api]]
+name = "Queue"
+status = "py2"
+fix = "Use `queue`."
+
+[[api]]
+name = "StringIO"
+status = "py2"
+fix = "Use `io.StringIO`."
+
+[[api]]
+name = "cStringIO"
+status = "py2"
+fix = "Use `io.StringIO` / `io.BytesIO`."
+
+[[api]]
+name = "cPickle"
+status = "py2"
+fix = "Use `pickle`."
+
+[[api]]
+name = "HTMLParser"
+status = "py2"
+fix = "Use `html.parser`."
+
+[[api]]
+name = "httplib"
+status = "py2"
+fix = "Use `http.client`."
+
+[[api]]
+name = "cookielib"
+status = "py2"
+fix = "Use `http.cookiejar`."
+
+[[api]]
+name = "SocketServer"
+status = "py2"
+fix = "Use `socketserver`."
+
+[[api]]
+name = "Tkinter"
+status = "py2"
+fix = "Use `tkinter`."
+
+[[api]]
+name = "__builtin__"
+status = "py2"
+fix = "Use `builtins`."
+
+[[api]]
+name = "commands"
+status = "py2"
+fix = "Use `subprocess.run(..., capture_output=True, text=True)`."
+
+# -- Standard library: removed modules with better fixes than the generic one --
+
+[[api]]
+name = "distutils"
+status = "removed"
+version = "3.12"
+fix = "Use `setuptools`, `packaging.version`, `shutil.which` or `sysconfig` instead."
+
+[[api]]
+name = "imp"
+status = "removed"
+version = "3.12"
+fix = "Use `importlib` (`importlib.import_module`, `importlib.util`)."
+
+[[api]]
+name = "asynchat"
+status = "removed"
+version = "3.12"
+fix = "Use `asyncio` streams."
+
+[[api]]
+name = "asyncore"
+status = "removed"
+version = "3.12"
+fix = "Use `asyncio`."
+
+[[api]]
+name = "smtpd"
+status = "removed"
+version = "3.12"
+fix = "Use the `aiosmtpd` package."
+
+[[api]]
+name = "cgi"
+status = "removed"
+version = "3.13"
+fix = "Use `urllib.parse.parse_qs` for query strings, `email.message` for multipart bodies and `html.escape` for escaping - or a web framework."
+
+[[api]]
+name = "cgitb"
+status = "removed"
+version = "3.13"
+fix = "Use `traceback` or `faulthandler`."
+
+[[api]]
+name = "crypt"
+status = "removed"
+version = "3.13"
+fix = "Use `hashlib.scrypt` or the `bcrypt` / `argon2-cffi` packages."
+
+[[api]]
+name = "telnetlib"
+status = "removed"
+version = "3.13"
+fix = "Use the `telnetlib3` package or `asyncio` streams."
+
+[[api]]
+name = "pipes"
+status = "removed"
+version = "3.13"
+fix = "Use `shlex.quote` together with `subprocess`."
+
+[[api]]
+name = "imghdr"
+status = "removed"
+version = "3.13"
+fix = "Use the `filetype` package or `PIL.Image.open(...).format`."
+
+[[api]]
+name = "sndhdr"
+status = "removed"
+version = "3.13"
+fix = "Use the `filetype` package."
+
+[[api]]
+name = "nntplib"
+status = "removed"
+version = "3.13"
+fix = "Use a third-party NNTP client."
+
+[[api]]
+name = "audioop"
+status = "removed"
+version = "3.13"
+fix = "Use `numpy` or the `audioop-lts` package."
+
+[[api]]
+name = "uu"
+status = "removed"
+version = "3.13"
+fix = "Use `base64`."
+
+[[api]]
+name = "xdrlib"
+status = "removed"
+version = "3.13"
+fix = "Use `struct`."
+
+[[api]]
+name = "msilib"
+status = "removed"
+version = "3.13"
+fix = "Use a third-party MSI tool."
+
+[[api]]
+name = "nis"
+status = "removed"
+version = "3.13"
+fix = "Use a third-party NIS client."
+
+[[api]]
+name = "spwd"
+status = "removed"
+version = "3.13"
+fix = "Use the `python-pam` package."
+
+[[api]]
+name = "ossaudiodev"
+status = "removed"
+version = "3.13"
+fix = "Use a third-party audio library."
+
+[[api]]
+name = "aifc"
+status = "removed"
+version = "3.13"
+fix = "Use the `soundfile` package."
+
+[[api]]
+name = "sunau"
+status = "removed"
+version = "3.13"
+fix = "Use the `soundfile` package."
+
+[[api]]
+name = "chunk"
+status = "removed"
+version = "3.13"
+fix = "Parse the chunks with `struct`."
+
+[[api]]
+name = "mailcap"
+status = "removed"
+version = "3.13"
+fix = "Use `mimetypes`."
+
+[[api]]
+name = "lib2to3"
+status = "removed"
+version = "3.13"
+fix = "Use `ast`/`libcst` for source transformations; 2to3 itself is no longer needed."
+
+# -- Standard library: removed names ------------------------------------------
+
+[[api]]
+name = "time.clock"
+status = "removed"
+version = "3.8"
+fix = "Use `time.perf_counter()` or `time.process_time()`."
+
+[[api]]
+name = "os.errno"
+status = "removed"
+version = "3.7"
+fix = "Use `import errno`."
+
+[[api]]
+name = "inspect.getargspec"
+status = "removed"
+version = "3.11"
+fix = "Use `inspect.signature()` or `inspect.getfullargspec()`."
+
+[[api]]
+name = "asyncio.coroutine"
+status = "removed"
+version = "3.11"
+fix = "Use an `async def` function."
+
+[[api]]
+name = "fractions.gcd"
+status = "removed"
+version = "3.9"
+fix = "Use `math.gcd`."
+
+[[api]]
+name = "base64.encodestring"
+status = "removed"
+version = "3.9"
+fix = "Use `base64.encodebytes`."
+
+[[api]]
+name = "base64.decodestring"
+status = "removed"
+version = "3.9"
+fix = "Use `base64.decodebytes`."
+
+[[api]]
+name = "xml.etree.cElementTree"
+status = "removed"
+version = "3.9"
+fix = "Use `xml.etree.ElementTree`."
+
+[[api]]
+name = "configparser.SafeConfigParser"
+status = "removed"
+version = "3.12"
+fix = "Use `configparser.ConfigParser`."
+
+[[api]]
+name = "ssl.wrap_socket"
+status = "removed"
+version = "3.12"
+fix = "Use `ssl.create_default_context().wrap_socket(...)`."
+
+[[api]]
+name = "locale.format"
+status = "removed"
+version = "3.12"
+fix = "Use `locale.format_string`."
+
+[[api]]
+name = "unittest.makeSuite"
+status = "removed"
+version = "3.13"
+fix = "Use `unittest.TestLoader().loadTestsFromTestCase(...)`."
+
+[[api]]
+name = "platform.linux_distribution"
+status = "removed"
+version = "3.8"
+fix = "Use `platform.freedesktop_os_release()` or the `distro` package."
+
+[[api]]
+name = "platform.dist"
+status = "removed"
+version = "3.8"
+fix = "Use `platform.freedesktop_os_release()` or `distro`."
+
+# -- Standard library: deprecations worth a specific fix -----------------------
+
+[[api]]
+name = "datetime.datetime.utcnow"
+status = "deprecated"
+version = "3.12"
+message = "is deprecated (Python 3.12) and returns a naive datetime"
+fix = "Use `datetime.now(timezone.utc)` (`from datetime import datetime, timezone`)."
+
+[[api]]
+name = "datetime.datetime.utcfromtimestamp"
+status = "deprecated"
+version = "3.12"
+message = "is deprecated (Python 3.12) and returns a naive datetime"
+fix = "Use `datetime.fromtimestamp(ts, tz=timezone.utc)`."
+
+[[api]]
+name = "asyncio.get_event_loop"
+status = "deprecated"
+version = "3.10"
+message = "is deprecated (Python 3.10-3.12) when no loop is running"
+fix = "Use `asyncio.run(main())` at the top level, or `asyncio.get_running_loop()` inside a coroutine."
+
+[[api]]
+name = "logging.warn"
+status = "deprecated"
+version = "3.3"
+fix = "Use `logging.warning`."
+
+[[api]]
+name = "pkg_resources"
+status = "deprecated"
+package = "setuptools"
+message = "is deprecated in setuptools; it is slow to import and scheduled for removal"
+fix = "Use `importlib.metadata` (versions, entry points) or `importlib.resources` (data files)."
+
+# -- Third-party APIs that moved or vanished ----------------------------------
+
+[[api]]
+name = "sklearn.cross_validation"
+status = "removed"
+package = "scikit-learn"
+version = "0.20"
+fix = "Use `sklearn.model_selection`."
+
+[[api]]
+name = "sklearn.grid_search"
+status = "removed"
+package = "scikit-learn"
+version = "0.20"
+fix = "Use `sklearn.model_selection`."
+
+[[api]]
+name = "sklearn.externals.joblib"
+status = "removed"
+package = "scikit-learn"
+version = "0.23"
+fix = "Use `import joblib`."
+
+[[api]]
+name = "pandas.Panel"
+status = "removed"
+package = "pandas"
+version = "1.0"
+fix = "Use a MultiIndex `DataFrame` or `xarray`."
+
+[[api]]
+name = "pydantic.BaseSettings"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+message = "was moved out of pydantic 2.0 into a separate package"
+fix = "`pip install pydantic-settings` and use `from pydantic_settings import BaseSettings`."
+
+[[api]]
+name = "pydantic.validator"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+fix = "Use `@field_validator` (`from pydantic import field_validator`)."
+
+[[api]]
+name = "pydantic.root_validator"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+fix = "Use `@model_validator` (`from pydantic import model_validator`)."
+
+[[api]]
+name = "openai.ChatCompletion"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Use the client: `from openai import OpenAI; client = OpenAI(); client.chat.completions.create(model=..., messages=[...])`."
+
+[[api]]
+name = "openai.Completion"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Use `OpenAI().completions.create(...)` (or chat completions)."
+
+[[api]]
+name = "openai.Embedding"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Use `OpenAI().embeddings.create(...)`."
+
+[[api]]
+name = "openai.Image"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Use `OpenAI().images.generate(...)`."
+
+[[api]]
+name = "openai.error"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Exceptions live at the top level, e.g. `openai.APIError`, `openai.RateLimitError`."
+
+[[api]]
+name = "langchain.llms.OpenAI"
+status = "removed"
+package = "langchain"
+version = "0.2"
+fix = "`pip install langchain-openai` and use `from langchain_openai import OpenAI`."
+
+[[api]]
+name = "langchain.chat_models.ChatOpenAI"
+status = "removed"
+package = "langchain"
+version = "0.2"
+fix = "`pip install langchain-openai` and use `from langchain_openai import ChatOpenAI`."
+
+[[api]]
+name = "langchain.embeddings.OpenAIEmbeddings"
+status = "removed"
+package = "langchain"
+version = "0.2"
+fix = "`pip install langchain-openai` and use `from langchain_openai import OpenAIEmbeddings`."
+
+[[api]]
+name = "flask.escape"
+status = "removed"
+package = "Flask"
+version = "2.3"
+fix = "Use `from markupsafe import escape`."
+
+[[api]]
+name = "flask.Markup"
+status = "removed"
+package = "Flask"
+version = "2.3"
+fix = "Use `from markupsafe import Markup`."
+
+[[api]]
+name = "flask.json.JSONEncoder"
+status = "removed"
+package = "Flask"
+version = "2.3"
+fix = "Subclass `flask.json.provider.DefaultJSONProvider` and set `app.json`."
+
+[[api]]
+name = "jinja2.Markup"
+status = "removed"
+package = "Jinja2"
+version = "3.0"
+fix = "Use `from markupsafe import Markup`."
+
+[[api]]
+name = "jinja2.escape"
+status = "removed"
+package = "Jinja2"
+version = "3.0"
+fix = "Use `from markupsafe import escape`."
+
+[[api]]
+name = "werkzeug.secure_filename"
+status = "removed"
+package = "Werkzeug"
+version = "1.0"
+fix = "Use `from werkzeug.utils import secure_filename`."
+
+[[api]]
+name = "werkzeug.cached_property"
+status = "removed"
+package = "Werkzeug"
+version = "1.0"
+fix = "Use `from werkzeug.utils import cached_property`."
+
+[[api]]
+name = "django.conf.urls.url"
+status = "removed"
+package = "Django"
+version = "4.0"
+fix = "Use `django.urls.re_path` (or `path`)."
+
+[[api]]
+name = "django.utils.translation.ugettext"
+status = "removed"
+package = "Django"
+version = "4.0"
+fix = "Use `gettext`."
+
+[[api]]
+name = "django.utils.translation.ugettext_lazy"
+status = "removed"
+package = "Django"
+version = "4.0"
+fix = "Use `gettext_lazy`."
+
+[[api]]
+name = "django.utils.encoding.force_text"
+status = "removed"
+package = "Django"
+version = "4.0"
+fix = "Use `force_str`."
+
+[[api]]
+name = "django.utils.six"
+status = "removed"
+package = "Django"
+version = "3.0"
+fix = "Drop Python 2 compatibility code."
+
+[[api]]
+name = "sqlalchemy.ext.declarative.declarative_base"
+status = "deprecated"
+package = "SQLAlchemy"
+version = "2.0"
+fix = "Subclass `sqlalchemy.orm.DeclarativeBase`."
+
+[[api]]
+name = "tensorflow.Session"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use eager execution / `tf.function`, or `tf.compat.v1.Session`."
+
+[[api]]
+name = "tensorflow.placeholder"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Pass tensors directly to a `tf.function`, or use `tf.compat.v1`."
+
+[[api]]
+name = "tensorflow.contrib"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use core TF APIs or TF Addons."
+
+[[api]]
+name = "boto"
+status = "deprecated"
+package = "boto"
+message = "is unmaintained since 2018"
+fix = "Use `boto3` (`import boto3; boto3.client('s3')`)."
+
+# -- Families -------------------------------------------------------------------
+
+[[family]]
+prefix = "collections"
+status = "removed"
+version = "3.10"
+fix = "Use `from collections.abc import {name}`."
+names = { Awaitable = "", Coroutine = "", AsyncIterable = "", AsyncIterator = "", AsyncGenerator = "", Hashable = "", Iterable = "", Iterator = "", Generator = "", Reversible = "", Sized = "", Container = "", Callable = "", Collection = "", Set = "", MutableSet = "", Mapping = "", MutableMapping = "", MappingView = "", KeysView = "", ItemsView = "", ValuesView = "", Sequence = "", MutableSequence = "", ByteString = "" }
+
+[[family]]
+prefix = "numpy"
+status = "removed"
+package = "NumPy"
+version = "1.24/2.0"
+fix = "Use {replacement}."
+names = { float = "the builtin `float` (or `numpy.float64`)", int = "the builtin `int` (or `numpy.int64`)", bool = "the builtin `bool` (or `numpy.bool_`)", object = "the builtin `object`", str = "the builtin `str`", long = "the builtin `int`", unicode = "the builtin `str`", complex = "the builtin `complex`", float_ = "`numpy.float64`", complex_ = "`numpy.complex128`", string_ = "`numpy.bytes_`", unicode_ = "`numpy.str_`", NaN = "`numpy.nan`", NAN = "`numpy.nan`", Inf = "`numpy.inf`", Infinity = "`numpy.inf`", PINF = "`numpy.inf`", NINF = "`-numpy.inf`", product = "`numpy.prod`", cumproduct = "`numpy.cumprod`", alltrue = "`numpy.all`", sometrue = "`numpy.any`", round_ = "`numpy.round`", asfarray = "`numpy.asarray(x, dtype=float)`" }
+
+# -- Methods: wrong on any receiver ----------------------------------------------
+
+[[method]]
+name = "has_key"
+status = "py2"
+fix = "Use `key in mapping`."
+
+[[method]]
+name = "iteritems"
+status = "py2"
+message = "does not exist on Python 3 dicts or pandas >= 2.0 objects"
+fix = "Use `.items()`."
+
+[[method]]
+name = "iterkeys"
+status = "py2"
+fix = "Use `.keys()` or iterate the dict directly."
+
+[[method]]
+name = "itervalues"
+status = "py2"
+fix = "Use `.values()`."
+
+[[method]]
+name = "assertEquals"
+status = "removed"
+version = "3.12"
+fix = "Use `assertEqual`."
+
+[[method]]
+name = "assertNotEquals"
+status = "removed"
+version = "3.12"
+fix = "Use `assertNotEqual`."
+
+[[method]]
+name = "assertItemsEqual"
+status = "py2"
+fix = "Use `assertCountEqual`."
+
+[[method]]
+name = "assertRegexpMatches"
+status = "removed"
+version = "3.12"
+fix = "Use `assertRegex`."
+
+[[method]]
+name = "assertRaisesRegexp"
+status = "removed"
+version = "3.12"
+fix = "Use `assertRaisesRegex`."
+
+[[method]]
+name = "assertDictContainsSubset"
+status = "removed"
+version = "3.12"
+fix = "Use `assertLessEqual(subset.items(), d.items())`."
+
+[[method]]
+name = "as_matrix"
+status = "removed"
+package = "pandas"
+version = "1.0"
+fix = "Use `.to_numpy()`."

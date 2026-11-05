@@ -167,7 +167,14 @@ def _byte_to_char(text: str, byte_offset: int) -> int:
 # -- shared AST helpers ---------------------------------------------------
 
 _GUARD_EXCEPTIONS = frozenset(
-    {"ImportError", "ModuleNotFoundError", "AttributeError", "Exception", "BaseException"}
+    {
+        "ImportError",
+        "ModuleNotFoundError",
+        "AttributeError",
+        "NameError",
+        "Exception",
+        "BaseException",
+    }
 )
 
 

@@ -2,6 +2,7 @@
 
     python -m lintex.knowledge.sync --typeshed /path/to/typeshed
     python -m lintex.knowledge.sync --from-mypy      # mypy's bundled copy (stdlib only)
+    python -m lintex.knowledge.sync --from-mypy --stub-packages default   # + PyPI types-*
 
 Two sources are read:
 
@@ -144,7 +145,7 @@ def deprecated_names(stub_root: Path, package: str = "python") -> list[dict]:
     return entries
 
 
-def build(typeshed: Path, via: str) -> dict:
+def build(typeshed: Path, via: str, stub_dirs: list[tuple[Path, str, str]] | None = None) -> dict:
     stdlib = typeshed / "stdlib"
     removed, latest = removed_modules(stdlib / "VERSIONS")
     api = removed + deprecated_names(stdlib)
@@ -152,24 +153,31 @@ def build(typeshed: Path, via: str) -> dict:
     if stubs.is_dir():
         for dist in sorted(p for p in stubs.iterdir() if p.is_dir()):
             api += _third_party(dist)
+    for directory, package, _wheel in stub_dirs or []:
+        api += _third_party(directory, package)
     seen: set[str] = set()
     unique = [e for e in api if not (e["name"] in seen or seen.add(e["name"]))]
-    return {
-        "source": {
-            "name": "typeshed",
-            "via": via,
-            "generated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "latest_python": latest,
-            "entries": len(unique),
-        },
-        "api": unique,
+    source = {
+        "name": "typeshed",
+        "via": via,
+        "generated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "latest_python": latest,
+        "entries": len(unique),
     }
+    if stub_dirs:
+        source["stub_packages"] = sorted(wheel for _, _, wheel in stub_dirs)
+    return {"source": source, "api": unique}
 
 
-def _third_party(dist: Path) -> list[dict]:
+def _third_party(dist: Path, package: str | None = None) -> list[dict]:
     """Deprecations in one ``stubs/<dist>`` directory, with modules rooted at the dist."""
     out: list[dict] = []
-    for pkg_dir in sorted(p for p in dist.iterdir() if p.is_dir() and not p.name.startswith("@")):
+    package = package or dist.name
+    for pkg_dir in sorted(
+        p
+        for p in dist.iterdir()
+        if p.is_dir() and not p.name.startswith("@") and not p.name.endswith(".dist-info")
+    ):
         defs: dict[str, list[str | None]] = defaultdict(list)
         for path in sorted(pkg_dir.rglob("*.pyi")):
             try:
@@ -187,11 +195,88 @@ def _third_party(dist: Path) -> list[dict]:
                 {
                     "name": qualname,
                     "status": "deprecated",
-                    "package": dist.name,
+                    "package": package,
                     "fix": text or "Deprecated upstream; check the library's documentation.",
                 }
             )
     return out
+
+
+# typeshed's third-party stubs are published to PyPI as `types-*` packages, so the
+# deprecations in them can be synced without a typeshed checkout. These are the
+# libraries agents reach for most; `--stub-packages` takes any list.
+DEFAULT_STUB_PACKAGES = (
+    "types-requests",
+    "types-PyYAML",
+    "types-six",
+    "types-setuptools",
+    "types-python-dateutil",
+    "types-pytz",
+    "types-Markdown",
+    "types-docutils",
+    "types-protobuf",
+    "types-simplejson",
+    "types-toml",
+    "types-tabulate",
+    "types-psutil",
+    "types-paramiko",
+    "types-pyOpenSSL",
+    "types-cachetools",
+    "types-ujson",
+    "types-regex",
+    "types-tqdm",
+    "types-jsonschema",
+    "types-Deprecated",
+    "types-colorama",
+    "types-mock",
+    "types-openpyxl",
+    "types-pexpect",
+    "types-html5lib",
+    "types-xmltodict",
+    "types-pygments",
+    "types-python-slugify",
+)
+
+
+def download_stubs(names: list[str], workdir: Path) -> list[tuple[Path, str, str]]:
+    """Fetch ``types-*`` wheels from PyPI and unpack them. Returns (dir, package, wheel)."""
+    import subprocess
+    import zipfile
+
+    workdir.mkdir(parents=True, exist_ok=True)
+    result = []
+    for name in names:
+        dest = workdir / name
+        dest.mkdir(exist_ok=True)
+        proc = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "pip",
+                "download",
+                "-q",
+                "--no-deps",
+                "--only-binary=:all:",
+                "-d",
+                str(dest),
+                name,
+            ],
+            capture_output=True,
+            text=True,
+        )
+        wheels = sorted(dest.glob("*.whl"))
+        if proc.returncode != 0 or not wheels:
+            print(
+                f"skipping {name}: {proc.stderr.strip().splitlines()[-1:] or 'no wheel'}",
+                file=sys.stderr,
+            )
+            continue
+        with zipfile.ZipFile(wheels[0]) as zf:
+            members = [m for m in zf.namelist() if m.endswith(".pyi") and ".." not in m]
+            zf.extractall(dest / "unpacked", members)
+        package = name[len("types-") :] if name.startswith("types-") else name
+        result.append((dest / "unpacked", package, wheels[0].name))
+    return result
 
 
 def mypy_typeshed() -> Path:
@@ -209,6 +294,18 @@ def main(argv: list[str] | None = None) -> int:
     source.add_argument("--from-mypy", action="store_true", help="use mypy's bundled typeshed")
     parser.add_argument("--out", type=Path, default=TYPESHED_PATH)
     parser.add_argument("--check", action="store_true", help="exit 1 if the output would change")
+    parser.add_argument(
+        "--stub-packages",
+        metavar="NAMES",
+        help="comma-separated `types-*` packages to fetch from PyPI for third-party "
+        "deprecations, or `default` for the built-in list",
+    )
+    parser.add_argument(
+        "--workdir",
+        type=Path,
+        default=None,
+        help="where to download stub wheels (default: a temporary directory)",
+    )
     args = parser.parse_args(argv)
 
     if args.from_mypy:
@@ -232,7 +329,20 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{typeshed} does not look like typeshed (no stdlib/VERSIONS)", file=sys.stderr)
         return 2
 
-    data = build(typeshed, via)
+    stub_dirs: list[tuple[Path, str, str]] = []
+    if args.stub_packages:
+        import tempfile
+
+        names = (
+            list(DEFAULT_STUB_PACKAGES)
+            if args.stub_packages == "default"
+            else [n.strip() for n in args.stub_packages.split(",") if n.strip()]
+        )
+        workdir = args.workdir or Path(tempfile.mkdtemp(prefix="lintex-stubs-"))
+        stub_dirs = download_stubs(names, workdir)
+        print(f"fetched {len(stub_dirs)} stub package(s) into {workdir}", file=sys.stderr)
+
+    data = build(typeshed, via, stub_dirs)
     text = json.dumps(data, indent=1, ensure_ascii=False) + "\n"
     if args.check:
         current = args.out.read_text(encoding="utf-8") if args.out.exists() else ""

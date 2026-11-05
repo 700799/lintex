@@ -178,8 +178,15 @@ LX101's list of removed, deprecated and Python-2-only names lives in two data fi
 - **`typeshed.json`**: generated from [typeshed](https://github.com/python/typeshed), the type
   stubs mypy and pyright run on. `stdlib/VERSIONS` gives every stdlib module removal, and
   `@deprecated` decorators give deprecated functions and methods with the upstream's own
-  message. Regenerate it with `python -m lintex.knowledge.sync --typeshed /path/to/typeshed`
-  (or `--from-mypy` for the stdlib part). Curated entries win where both know a name.
+  message, for the stdlib and for the third-party libraries whose stubs typeshed publishes to
+  PyPI as `types-*` packages (requests, PyYAML, setuptools, docutils, ...). Regenerate it with
+  `python -m lintex.knowledge.sync --from-mypy --stub-packages default` (or `--typeshed PATH`
+  for a full checkout). Curated entries win where both know a name.
+
+The curated pack also covers the Python 2 names agents still produce (`xrange`, `unicode`,
+`raw_input`, `md5`, `string.join`, ...) and the migrations they most often get wrong: pydantic
+1 → 2, openai 0.x → 1.x, LangChain 0.1 → 0.2+, TensorFlow 1 → 2, Django, Flask, Pillow,
+scikit-learn, pytest.
 
 Removals are judged against the project's minimum Python: lintex reads `requires-python` from
 `pyproject.toml` (or `target-version = "py311"` under `[tool.lintex]`). `import cgi` is an

@@ -67,10 +67,35 @@ class KnownBadApiRule(Rule):
         "warning before that. Code inside `try/except ImportError` or `if sys.version_info` "
         "guards is ignored. Knowledge lives in `lintex/knowledge/`; see the README to add to it."
     )
-    node_types = (ast.Import, ast.ImportFrom, ast.Attribute, ast.Call)
+    node_types = (ast.Import, ast.ImportFrom, ast.Attribute, ast.Call, ast.Name)
 
     def check_node(self, node: Any, ctx: FileContext) -> Iterator[Violation]:
-        if isinstance(node, (ast.Import, ast.ImportFrom)):
+        if isinstance(node, ast.Name):
+            # Python 2 builtins (`xrange`, `unicode`, `raw_input`): a bare name that
+            # nothing in the file defines or imports.
+            entry = KB.builtins.get(node.id)
+            if (
+                entry is not None
+                and isinstance(node.ctx, ast.Load)
+                and node.id not in ctx.rebound
+                and node.id not in ctx.imports
+                and not is_compat_guarded(node, ctx)
+            ):
+                target = _target(ctx)
+                v = self.violation(
+                    ctx,
+                    node,
+                    f"`{node.id}` {entry.describe(target)}.",
+                    why=_HALLUCINATION_WHY,
+                    fix=entry.fix,
+                    severity=entry.severity(target),
+                )
+                if entry.rewrite and v.end_col is not None:
+                    v = dataclasses.replace(
+                        v, autofix=Autofix(v.line, v.col, v.end_col, entry.rewrite)
+                    )
+                yield v
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
             seen: set[str] = set()
             for name in _imported_names(node):
                 match = KB.match_prefix(name)

@@ -127,6 +127,8 @@ def format_pretty_violation(v: Violation, style: Style, show_why: bool = True) -
     head = f"  {style.paint(pos, 'dim')} {sev} {code}  "
     head_width = 2 + 7 + 1 + 9 + 1 + len(v.code) + 2
     msg_lines = textwrap.wrap(v.message, width=max(style.width - head_width, 30)) or [v.message]
+    if v.fixable:
+        msg_lines[-1] += " " + style.paint("[fixable]", "green")
     lines = [head + msg_lines[0]] + [f"{' ' * head_width}{m}" for m in msg_lines[1:]]
     lines += _source_context(v, style)
     if show_why and v.why:
@@ -218,6 +220,13 @@ def format_summary(result: LintResult, style: Style) -> str:
             )
         if len(by_code) > 6:
             lines.append(style.paint(f"  … and {len(by_code) - 6} more rules", "dim"))
+    fixable = sum(1 for v in result.violations if v.fixable)
+    if fixable:
+        lines.append(
+            "  "
+            + style.paint(f"{fixable} fixable", "green", "bold")
+            + style.paint(" with `lintex check --fix` (pure renames only)", "dim")
+        )
     lines.append(
         dim_note(
             "Each finding's `fix` line says what to write instead. "
@@ -257,7 +266,8 @@ def format_full(result: LintResult, style: Style) -> str:
 
 def format_concise(result: LintResult, style: Style) -> str:
     lines = [
-        f"{v.path}:{v.line}:{v.col}: {style.paint(v.code, style.sev_color(v.severity), 'bold')} {v.message}"
+        f"{v.path}:{v.line}:{v.col}: {style.paint(v.code, style.sev_color(v.severity), 'bold')} "
+        f"{v.message}{' [fixable]' if v.fixable else ''}"
         for v in sorted(result.violations, key=lambda v: (v.path, v.line, v.col, v.code))
     ]
     lines.append(format_summary(result, style))

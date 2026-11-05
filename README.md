@@ -96,11 +96,37 @@ lintex check --format concise   # one `path:line:col: CODE message` per finding,
 lintex check --format github    # GitHub Actions annotations, shown inline on the PR diff
 lintex check --format full      # every finding with its full why/fix; what the hooks give agents
 lintex check -v                 # pretty output with the rationale repeated for every finding
+lintex check --fix              # apply the pure renames (tagged [fixable]), then report the rest
 lintex check --select LX1,LX2   # only hallucination + banned-pattern rules
 lintex check --fail-on warning  # non-zero exit on warnings too
 lintex rules                    # list rules and whether they are enabled
 lintex explain LX101            # documentation for one rule
+lintex init --hooks             # write a starting config and install all the hooks
+lintex doctor                   # is everything wired up? says what to run if not
 ```
+
+### Getting started in one minute
+
+```bash
+pip install lintex
+cd your-project
+lintex init --hooks   # [tool.lintex] in pyproject.toml + Claude Code hook, status line, git hook
+lintex doctor         # confirms each piece, with the command to run for anything missing
+lintex check          # lint the project
+```
+
+`lintex init` appends a commented `[tool.lintex]` block to `pyproject.toml` (or writes
+`.lintex.toml` if there is no pyproject) and refuses to touch an existing configuration.
+
+### Fixing automatically
+
+`lintex check --fix` applies the rewrites that cannot be wrong: a name that no longer exists
+replaced by its drop-in successor in the same module or by a builtin. `from collections import
+Mapping` becomes `from collections.abc import Mapping`, `.iteritems()` becomes `.items()`,
+`sys.maxint` becomes `sys.maxsize`, `np.float(x)` becomes `float(x)`, `assertEquals` becomes
+`assertEqual`. Findings that qualify are tagged `[fixable]`, and `--json` carries the exact edit
+as `autofix`. Anything needing a new import or a judgement call (`fractions.gcd` → `math.gcd`,
+`datetime.utcnow()`) stays a text-only `fix` for you or the agent to apply.
 
 Exit status: `0` means clean (or only findings below `fail-on`), `1` means violations, `2` means
 a usage or configuration error.

@@ -20,26 +20,31 @@
 
 [[api]]
 name = "sys.maxint"
+rewrite = "sys.maxsize"
 status = "py2"
 fix = "Use `sys.maxsize`."
 
 [[api]]
 name = "os.getcwdu"
+rewrite = "os.getcwd"
 status = "py2"
 fix = "Use `os.getcwd()`."
 
 [[api]]
 name = "string.letters"
+rewrite = "string.ascii_letters"
 status = "py2"
 fix = "Use `string.ascii_letters`."
 
 [[api]]
 name = "string.lowercase"
+rewrite = "string.ascii_lowercase"
 status = "py2"
 fix = "Use `string.ascii_lowercase`."
 
 [[api]]
 name = "string.uppercase"
+rewrite = "string.ascii_uppercase"
 status = "py2"
 fix = "Use `string.ascii_uppercase`."
 
@@ -50,21 +55,25 @@ fix = "Use `str.maketrans`."
 
 [[api]]
 name = "itertools.izip"
+rewrite = "zip"
 status = "py2"
 fix = "Use the builtin `zip`."
 
 [[api]]
 name = "itertools.imap"
+rewrite = "map"
 status = "py2"
 fix = "Use the builtin `map`."
 
 [[api]]
 name = "itertools.ifilter"
+rewrite = "filter"
 status = "py2"
 fix = "Use the builtin `filter`."
 
 [[api]]
 name = "itertools.izip_longest"
+rewrite = "itertools.zip_longest"
 status = "py2"
 fix = "Use `itertools.zip_longest`."
 
@@ -314,6 +323,7 @@ fix = "Use `ast`/`libcst` for source transformations; 2to3 itself is no longer n
 
 [[api]]
 name = "time.clock"
+rewrite = "time.perf_counter"
 status = "removed"
 version = "3.8"
 fix = "Use `time.perf_counter()` or `time.process_time()`."
@@ -344,24 +354,28 @@ fix = "Use `math.gcd`."
 
 [[api]]
 name = "base64.encodestring"
+rewrite = "base64.encodebytes"
 status = "removed"
 version = "3.9"
 fix = "Use `base64.encodebytes`."
 
 [[api]]
 name = "base64.decodestring"
+rewrite = "base64.decodebytes"
 status = "removed"
 version = "3.9"
 fix = "Use `base64.decodebytes`."
 
 [[api]]
 name = "xml.etree.cElementTree"
+rewrite = "xml.etree.ElementTree"
 status = "removed"
 version = "3.9"
 fix = "Use `xml.etree.ElementTree`."
 
 [[api]]
 name = "configparser.SafeConfigParser"
+rewrite = "configparser.ConfigParser"
 status = "removed"
 version = "3.12"
 fix = "Use `configparser.ConfigParser`."
@@ -374,6 +388,7 @@ fix = "Use `ssl.create_default_context().wrap_socket(...)`."
 
 [[api]]
 name = "locale.format"
+rewrite = "locale.format_string"
 status = "removed"
 version = "3.12"
 fix = "Use `locale.format_string`."
@@ -421,6 +436,7 @@ fix = "Use `asyncio.run(main())` at the top level, or `asyncio.get_running_loop(
 
 [[api]]
 name = "logging.warn"
+rewrite = "logging.warning"
 status = "deprecated"
 version = "3.3"
 fix = "Use `logging.warning`."
@@ -666,6 +682,7 @@ prefix = "collections"
 status = "removed"
 version = "3.10"
 fix = "Use `from collections.abc import {name}`."
+rewrite = "collections.abc.{name}"
 names = { Awaitable = "", Coroutine = "", AsyncIterable = "", AsyncIterator = "", AsyncGenerator = "", Hashable = "", Iterable = "", Iterator = "", Generator = "", Reversible = "", Sized = "", Container = "", Callable = "", Collection = "", Set = "", MutableSet = "", Mapping = "", MutableMapping = "", MappingView = "", KeysView = "", ItemsView = "", ValuesView = "", Sequence = "", MutableSequence = "", ByteString = "" }
 
 [[family]]
@@ -674,6 +691,7 @@ status = "removed"
 package = "NumPy"
 version = "1.24/2.0"
 fix = "Use {replacement}."
+rewrites = { float = "float", int = "int", bool = "bool", object = "object", str = "str", long = "int", unicode = "str", complex = "complex", float_ = "numpy.float64", complex_ = "numpy.complex128", string_ = "numpy.bytes_", unicode_ = "numpy.str_", NaN = "numpy.nan", NAN = "numpy.nan", Inf = "numpy.inf", Infinity = "numpy.inf", PINF = "numpy.inf", product = "numpy.prod", cumproduct = "numpy.cumprod", alltrue = "numpy.all", sometrue = "numpy.any", round_ = "numpy.round" }
 names = { float = "the builtin `float` (or `numpy.float64`)", int = "the builtin `int` (or `numpy.int64`)", bool = "the builtin `bool` (or `numpy.bool_`)", object = "the builtin `object`", str = "the builtin `str`", long = "the builtin `int`", unicode = "the builtin `str`", complex = "the builtin `complex`", float_ = "`numpy.float64`", complex_ = "`numpy.complex128`", string_ = "`numpy.bytes_`", unicode_ = "`numpy.str_`", NaN = "`numpy.nan`", NAN = "`numpy.nan`", Inf = "`numpy.inf`", Infinity = "`numpy.inf`", PINF = "`numpy.inf`", NINF = "`-numpy.inf`", product = "`numpy.prod`", cumproduct = "`numpy.cumprod`", alltrue = "`numpy.all`", sometrue = "`numpy.any`", round_ = "`numpy.round`", asfarray = "`numpy.asarray(x, dtype=float)`" }
 
 # -- Methods: wrong on any receiver ----------------------------------------------
@@ -685,45 +703,53 @@ fix = "Use `key in mapping`."
 
 [[method]]
 name = "iteritems"
+rewrite = "items"
 status = "py2"
 message = "does not exist on Python 3 dicts or pandas >= 2.0 objects"
 fix = "Use `.items()`."
 
 [[method]]
 name = "iterkeys"
+rewrite = "keys"
 status = "py2"
 fix = "Use `.keys()` or iterate the dict directly."
 
 [[method]]
 name = "itervalues"
+rewrite = "values"
 status = "py2"
 fix = "Use `.values()`."
 
 [[method]]
 name = "assertEquals"
+rewrite = "assertEqual"
 status = "removed"
 version = "3.12"
 fix = "Use `assertEqual`."
 
 [[method]]
 name = "assertNotEquals"
+rewrite = "assertNotEqual"
 status = "removed"
 version = "3.12"
 fix = "Use `assertNotEqual`."
 
 [[method]]
 name = "assertItemsEqual"
+rewrite = "assertCountEqual"
 status = "py2"
 fix = "Use `assertCountEqual`."
 
 [[method]]
 name = "assertRegexpMatches"
+rewrite = "assertRegex"
 status = "removed"
 version = "3.12"
 fix = "Use `assertRegex`."
 
 [[method]]
 name = "assertRaisesRegexp"
+rewrite = "assertRaisesRegex"
 status = "removed"
 version = "3.12"
 fix = "Use `assertRaisesRegex`."
@@ -736,6 +762,7 @@ fix = "Use `assertLessEqual(subset.items(), d.items())`."
 
 [[method]]
 name = "as_matrix"
+rewrite = "to_numpy"
 status = "removed"
 package = "pandas"
 version = "1.0"

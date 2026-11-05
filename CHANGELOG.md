@@ -7,6 +7,19 @@ severities may change between minor versions as they are tuned on real codebases
 
 ## [Unreleased]
 
+### Added
+
+- `lintex check --fix` applies the mechanical rewrites: pure renames of names that no
+  longer exist (`collections.Mapping` → `collections.abc.Mapping`, `.iteritems()` → `.items()`,
+  `sys.maxint` → `sys.maxsize`, `np.float` → `float`, `assertEquals` → `assertEqual`, ...).
+  Findings that can be fixed are tagged `[fixable]` and carry an `autofix` in `--json`. Anything
+  that would need a new import or a judgement call stays a text-only fix.
+- `lintex init` writes a commented `[tool.lintex]` block into `pyproject.toml` (or a
+  `.lintex.toml`), and `--hooks` installs the Claude Code hook, status line and git hook in one go.
+- `lintex doctor` checks that lintex is on PATH, the config loads, which Python is targeted, the
+  knowledge packs loaded, and whether the Claude Code hook, status line, git hook and ledger are
+  wired up, with the command to run for each that isn't.
+
 ### Fixed
 
 - Piping output into a pager or `head` no longer ends in a `BrokenPipeError` traceback;

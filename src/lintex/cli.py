@@ -5,6 +5,8 @@ lintex rules [--json]                            list rules
 lintex explain CODE                              document a rule
 lintex report [--since 24h] [--session ID]        what the hook caught and what got fixed
 lintex statusline [--segment]                    Claude Code status line segment
+lintex init [--hooks]                            write a starting config (and install hooks)
+lintex doctor                                    check the installation
 lintex install-hook git|claude-code|statusline   set up automatic checks
 lintex hook claude-code                          Claude Code PostToolUse entry point
 """
@@ -21,9 +23,10 @@ from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
 
-from lintex import __version__, ledger
+from lintex import __version__, doctor, ledger, scaffold
 from lintex.config import Config, ConfigError, load_config
 from lintex.engine import Linter, LintResult
+from lintex.fixer import fix_files
 from lintex.hooks.claude_code import install_claude_code_hook, run_claude_code_hook
 from lintex.hooks.git import (
     GitError,
@@ -44,7 +47,17 @@ from lintex.models import Severity, Violation
 from lintex.reporters import FORMATS, Style, dim_note, render
 from lintex.rules import ALL_RULES, get_rule, is_rule_active
 
-COMMANDS = ("check", "rules", "explain", "report", "statusline", "install-hook", "hook")
+COMMANDS = (
+    "check",
+    "rules",
+    "explain",
+    "report",
+    "statusline",
+    "init",
+    "doctor",
+    "install-hook",
+    "hook",
+)
 EXIT_OK, EXIT_VIOLATIONS, EXIT_USAGE = 0, 1, 2
 
 
@@ -72,6 +85,17 @@ def build_parser() -> argparse.ArgumentParser:
     _add_color_flags(explain)
 
     _add_ledger_parsers(sub)
+
+    init = sub.add_parser("init", help="write a starting [tool.lintex] config (and hooks)")
+    init.add_argument(
+        "--hooks",
+        action="store_true",
+        help="also install the Claude Code hook, status line and git pre-commit hook",
+    )
+
+    doctor = sub.add_parser("doctor", help="check that lintex, its config and hooks are wired up")
+    doctor.add_argument("--json", action="store_true")
+    _add_color_flags(doctor)
 
     install = sub.add_parser(
         "install-hook", help="install lintex as a git hook, Claude Code hook or status line"
@@ -144,6 +168,12 @@ def _add_check_parser(sub: argparse._SubParsersAction) -> None:
         help="lowest severity that makes the exit status non-zero (default: error)",
     )
     check.add_argument("--exit-zero", action="store_true", help="always exit 0")
+    check.add_argument(
+        "--fix",
+        action="store_true",
+        help="apply the mechanical rewrites (pure renames of removed names), then report "
+        "what remains",
+    )
     _add_color_flags(check)
 
 
@@ -205,6 +235,17 @@ def _dispatch(argv: Sequence[str] | None) -> int:
             style = Style.detect(sys.stdout, color=color)
             print(render_statusline(read_payload(sys.stdin), style, segment_only=args.segment))
             return EXIT_OK
+        if args.command == "init":
+            for line in scaffold.run_init(Path.cwd(), hooks=args.hooks):
+                print(line)
+            return EXIT_OK
+        if args.command == "doctor":
+            checks = doctor.run_checks()
+            if args.json:
+                print(json.dumps([dataclasses.asdict(c) for c in checks], indent=2))
+            else:
+                print(doctor.render(checks, Style.detect(sys.stdout, color=args.color)))
+            return doctor.exit_code(checks)
         if args.command == "install-hook":
             return _cmd_install(args)
         if args.command == "hook":
@@ -230,6 +271,8 @@ def _apply_overrides(config: Config, args: argparse.Namespace) -> Config:
 
 def _cmd_check(args: argparse.Namespace) -> int:
     scope_note = ""
+    if args.fix and args.staged:
+        raise ConfigError("--fix edits the working tree, so it cannot be combined with --staged")
     if args.staged or args.changed is not None:
         root = repo_root()
         config = _apply_overrides(load_config(root, args.config), args)
@@ -252,6 +295,33 @@ def _cmd_check(args: argparse.Namespace) -> int:
 
     fmt = "json" if args.json else (args.format or "pretty")
     style = Style.detect(sys.stdout, color=args.color)
+    if args.fix:
+        fixed = fix_files(result.violations, root=root if args.changed is not None else None)
+        if fixed.applied:
+            # Re-lint the touched files so the report shows what is actually left.
+            touched = list(fixed.files)
+            if args.changed is not None:
+                result, _ = _lint_changed(linter, root, base)
+            else:
+                remaining = [v for v in result.violations if v.path not in fixed.files]
+                refreshed = linter.lint_paths(
+                    [str(root / p) if args.changed is not None else p for p in touched]
+                )
+                result = LintResult(
+                    violations=remaining + refreshed.violations,
+                    files_checked=result.files_checked,
+                    duration_ms=result.duration_ms + refreshed.duration_ms,
+                )
+            if fmt in ("pretty", "full", "concise"):
+                print(
+                    style.paint(
+                        f"{style.sym['ok']} Fixed {fixed.applied} finding(s) in "
+                        f"{len(fixed.files)} file(s).",
+                        "green",
+                        "bold",
+                    )
+                    + "\n"
+                )
     print(render(result, fmt, style, verbose=args.verbose))
     if scope_note and fmt in ("pretty", "full", "concise"):
         print(dim_note(scope_note, style))

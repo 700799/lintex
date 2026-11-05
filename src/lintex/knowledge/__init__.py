@@ -49,6 +49,9 @@ class ApiEntry:
     fix: str = ""
     message: str = ""
     source: str = "curated"
+    #: Dotted name (or bare builtin) that is a drop-in replacement, when one
+    #: exists. Powers `lintex check --fix`; absent for anything needing judgement.
+    rewrite: str = ""
 
     @property
     def is_python(self) -> bool:
@@ -117,6 +120,7 @@ def _entry(raw: dict, source: str) -> ApiEntry:
         package=raw.get("package", PYTHON),
         fix=raw["fix"],
         message=raw.get("message", ""),
+        rewrite=str(raw.get("rewrite", "")),
         source=source,
     )
 
@@ -127,13 +131,20 @@ def _load_curated(path: Path) -> tuple[list[ApiEntry], list[ApiEntry], dict]:
     apis = [_entry(raw, "curated") for raw in data.get("api", [])]
     # Families: one fix template for many names (collections ABCs, numpy aliases).
     for family in data.get("family", []):
+        per_name_rewrites = family.get("rewrites", {})
         for name, replacement in family["names"].items():
+            rewrite = per_name_rewrites.get(name) or family.get("rewrite", "").format(name=name)
             apis.append(
                 _entry(
                     {
-                        **{k: v for k, v in family.items() if k not in ("names", "prefix")},
+                        **{
+                            k: v
+                            for k, v in family.items()
+                            if k not in ("names", "prefix", "rewrite", "rewrites")
+                        },
                         "name": f"{family['prefix']}.{name}",
                         "fix": family["fix"].format(name=name, replacement=replacement),
+                        "rewrite": rewrite,
                     },
                     "curated",
                 )

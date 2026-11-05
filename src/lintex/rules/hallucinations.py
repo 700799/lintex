@@ -11,6 +11,7 @@ a curated TOML file and a JSON file generated from typeshed.
 from __future__ import annotations
 
 import ast
+import dataclasses
 import difflib
 import importlib
 import importlib.util
@@ -24,7 +25,7 @@ from typing import Any
 
 from lintex import knowledge
 from lintex.knowledge import ApiEntry
-from lintex.models import Severity, Violation
+from lintex.models import Autofix, Severity, Violation
 from lintex.rules.base import FileContext, Rule, is_compat_guarded
 
 KB = knowledge.load()
@@ -100,7 +101,7 @@ class KnownBadApiRule(Rule):
                 and not is_compat_guarded(node, ctx)
             ):
                 target = _target(ctx)
-                yield self.violation(
+                v = self.violation(
                     ctx,
                     node.func,
                     f"`.{node.func.attr}()` {entry.describe(target)}.",
@@ -108,13 +109,16 @@ class KnownBadApiRule(Rule):
                     fix=entry.fix,
                     severity=entry.severity(target),
                 )
+                if entry.rewrite:
+                    v = _with_attr_rename(v, node.func.attr, entry.rewrite)
+                yield v
 
     def _report(self, ctx: FileContext, node: ast.AST, name: str, entry: ApiEntry) -> Violation:
         target = _target(ctx)
         fix = entry.fix
         if entry.source == "typeshed" and entry.status == "deprecated":
             fix = f"typeshed says: {fix}"
-        return self.violation(
+        v = self.violation(
             ctx,
             node,
             f"`{name}` {entry.describe(target)}.",
@@ -122,6 +126,57 @@ class KnownBadApiRule(Rule):
             fix=fix,
             severity=entry.severity(target),
         )
+        if entry.rewrite:
+            v = _autofix_for(v, node, name, entry.rewrite)
+        return v
+
+
+def _split(dotted: str) -> tuple[str, str]:
+    head, _, last = dotted.rpartition(".")
+    return head, last
+
+
+def _with_attr_rename(v: Violation, attr: str, replacement: str) -> Violation:
+    """Rewrite just the attribute name at the end of the span (``x.iteritems`` -> ``x.items``)."""
+    if v.end_col is None:
+        return v
+    start = v.end_col - len(attr)
+    if start < v.col:
+        return v
+    return dataclasses.replace(
+        v, autofix=Autofix(line=v.line, col=start, end_col=v.end_col, replacement=replacement)
+    )
+
+
+def _autofix_for(v: Violation, node: ast.AST, name: str, rewrite: str) -> Violation:
+    """Attach a rewrite when it is a pure rename: same module, or a builtin.
+
+    A rewrite into a different module (``fractions.gcd`` -> ``math.gcd``) would need
+    an import added, so it stays a text-only fix.
+    """
+    if v.end_col is None:
+        return v
+    old_head, old_last = _split(name)
+    new_head, new_last = _split(rewrite)
+    if isinstance(node, ast.Attribute):
+        if new_head == old_head:
+            return _with_attr_rename(v, old_last, new_last)
+        if not new_head:  # a builtin replaces the whole `mod.name` chain
+            return dataclasses.replace(
+                v, autofix=Autofix(line=v.line, col=v.col, end_col=v.end_col, replacement=rewrite)
+            )
+        return v
+    if isinstance(node, ast.ImportFrom) and len(node.names) == 1 and new_head:
+        alias = node.names[0]
+        if f"{node.module}.{alias.name}" != name:
+            return v  # the match was on the module itself, not this name
+        text = f"from {new_head} import {new_last}" + (
+            f" as {alias.asname}" if alias.asname else ""
+        )
+        return dataclasses.replace(
+            v, autofix=Autofix(line=v.line, col=v.col, end_col=v.end_col, replacement=text)
+        )
+    return v
 
 
 # -- LX102: names that do not exist in the stdlib ----------------------------

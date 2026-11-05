@@ -26,6 +26,30 @@ class Severity(str, enum.Enum):
 
 
 @dataclass(frozen=True)
+class Autofix:
+    """A mechanical, single-line rewrite that resolves a finding.
+
+    ``col`` and ``end_col`` are 1-based character offsets, ``end_col`` exclusive,
+    on ``line``. Only rewrites whose correctness does not depend on context are
+    ever offered (renames of a name that no longer exists), so applying them
+    is always safe.
+    """
+
+    line: int
+    col: int
+    end_col: int
+    replacement: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "line": self.line,
+            "col": self.col,
+            "end_col": self.end_col,
+            "replacement": self.replacement,
+        }
+
+
+@dataclass(frozen=True)
 class Violation:
     """A single lint finding.
 
@@ -48,6 +72,12 @@ class Violation:
     end_col: int | None = None
     #: The offending source line with its indentation (trailing whitespace removed).
     snippet: str = ""
+    #: Set when `lintex check --fix` can resolve this finding mechanically.
+    autofix: Autofix | None = None
+
+    @property
+    def fixable(self) -> bool:
+        return self.autofix is not None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -63,4 +93,6 @@ class Violation:
             "why": self.why,
             "fix": self.fix,
             "snippet": self.snippet.strip(),
+            "fixable": self.fixable,
+            "autofix": self.autofix.to_dict() if self.autofix else None,
         }

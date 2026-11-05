@@ -1,0 +1,14 @@
+{
+  "name": "lintex",
+  "owner": { "name": "lintex contributors", "url": "https://github.com/700799/lintex" },
+  "metadata": {
+    "description": "lintex: a linter for Python written by LLM coding agents"
+  },
+  "plugins": [
+    {
+      "name": "lintex",
+      "source": "./plugin",
+      "description": "Lints the Python files Claude edits and feeds each finding's fix back to Claude in the same step. Adds /lintex:check, /lintex:report and /lintex:doctor. Requires `pip install lintex`."
+    }
+  ]
+}

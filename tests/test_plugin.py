@@ -1,5 +1,7 @@
 """The Claude Code plugin under plugin/ and the marketplace file that points at it."""
 
+from __future__ import annotations
+
 import json
 import os
 import subprocess

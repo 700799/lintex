@@ -124,7 +124,7 @@ def check_claude_hook(project: Path) -> Check:
         "claude code hook",
         WARN,
         "not installed",
-        "Run `lintex install-hook claude-code` so edits are checked as the agent makes them.",
+        "Run `lintex install-hook claude-code`, or install the Claude Code plugin (`/plugin marketplace add 700799/lintex`, then `/plugin install lintex@lintex`); with the plugin, this warning is expected.",
     )
 
 

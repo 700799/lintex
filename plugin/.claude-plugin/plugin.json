@@ -1,0 +1,10 @@
+{
+  "name": "lintex",
+  "version": "0.1.0",
+  "description": "Lints the Python files Claude edits for hallucinated APIs, injection, silenced errors and elided code, and feeds the fix back to Claude in the same step.",
+  "author": { "name": "lintex contributors" },
+  "homepage": "https://github.com/700799/lintex",
+  "repository": "https://github.com/700799/lintex",
+  "license": "MIT",
+  "keywords": ["lint", "python", "hooks", "security", "hallucination"]
+}

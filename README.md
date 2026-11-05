@@ -235,7 +235,30 @@ rules:
 
 ## Hooks
 
-### Claude Code
+### Claude Code plugin (recommended)
+
+The plugin installs the edit hook and three slash commands in one step. lintex itself still has
+to be installed in the environment Claude Code runs in (`pip install lintex` or
+`pipx install lintex`); the plugin tells Claude how to ask you for that, once, if it's missing.
+
+```text
+/plugin install lintex --marketplace 700799/lintex
+```
+
+(On Claude Code before 2.1.275: `/plugin marketplace add 700799/lintex`, then
+`/plugin install lintex@lintex`.)
+
+- Every `Edit`, `Write` or `MultiEdit` of a `.py` file is checked, and findings go straight back
+  to Claude with their `why` and `fix`.
+- `/lintex:check` lints the files changed on the branch and has Claude fix what it reports.
+- `/lintex:report` shows what the hook caught this session, what Claude fixed, and what's open.
+- `/lintex:doctor` checks the installation.
+
+Plugins can't set Claude Code's status line, so that stays a one-liner:
+`lintex install-hook statusline`. With the plugin active, `lintex doctor`'s "claude code hook:
+not installed" warning is expected (the hook runs from the plugin, not from settings.json).
+
+### Claude Code hook without the plugin
 
 ```bash
 lintex install-hook claude-code              # writes .claude/settings.json

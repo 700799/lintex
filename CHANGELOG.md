@@ -9,6 +9,10 @@ severities may change between minor versions as they are tuned on real codebases
 
 ### Added
 
+- A Claude Code plugin (`/plugin marketplace add 700799/lintex`, then
+  `/plugin install lintex@lintex`) that installs the edit hook plus `/lintex:check`,
+  `/lintex:report` and `/lintex:doctor`. The hook finds lintex as a module, on PATH, or via
+  `python -m lintex`, and if none exists tells Claude once per session how to install it.
 - `lintex check --fix` applies the mechanical rewrites: pure renames of names that no
   longer exist (`collections.Mapping` → `collections.abc.Mapping`, `.iteritems()` → `.items()`,
   `sys.maxint` → `sys.maxsize`, `np.float` → `float`, `assertEquals` → `assertEqual`, ...).

@@ -65,9 +65,11 @@ def build_parser() -> argparse.ArgumentParser:
     rules = sub.add_parser("rules", help="list available rules")
     rules.add_argument("--json", action="store_true")
     rules.add_argument("--config", metavar="PATH")
+    _add_color_flags(rules)
 
     explain = sub.add_parser("explain", help="show documentation for a rule")
     explain.add_argument("rule", help="rule code or name, e.g. LX101 or hallucinated-api")
+    _add_color_flags(explain)
 
     _add_ledger_parsers(sub)
 
@@ -92,6 +94,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="lowest severity reported back to the agent (default: warning)",
     )
     return parser
+
+
+def _add_color_flags(parser: argparse.ArgumentParser) -> None:
+    """`--color` / `--no-color`; unset means detect from the terminal and NO_COLOR."""
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--color", dest="color", action="store_true", default=None)
+    group.add_argument("--no-color", dest="color", action="store_false")
 
 
 def _add_check_parser(sub: argparse._SubParsersAction) -> None:
@@ -135,9 +144,7 @@ def _add_check_parser(sub: argparse._SubParsersAction) -> None:
         help="lowest severity that makes the exit status non-zero (default: error)",
     )
     check.add_argument("--exit-zero", action="store_true", help="always exit 0")
-    color = check.add_mutually_exclusive_group()
-    color.add_argument("--color", dest="color", action="store_true", default=None)
-    color.add_argument("--no-color", dest="color", action="store_false")
+    _add_color_flags(check)
 
 
 def _add_ledger_parsers(sub: argparse._SubParsersAction) -> None:
@@ -149,20 +156,33 @@ def _add_ledger_parsers(sub: argparse._SubParsersAction) -> None:
     report.add_argument("--session", metavar="ID", help="only this Claude Code session")
     report.add_argument("--json", action="store_true")
     report.add_argument("--clear", action="store_true", help="delete this project's ledger")
-    rcolor = report.add_mutually_exclusive_group()
-    rcolor.add_argument("--color", dest="color", action="store_true", default=None)
-    rcolor.add_argument("--no-color", dest="color", action="store_false")
+    _add_color_flags(report)
 
     status = sub.add_parser("statusline", help="Claude Code status line (reads payload on stdin)")
     status.add_argument(
         "--segment", action="store_true", help="print only the lintex segment, for embedding"
     )
-    scolor = status.add_mutually_exclusive_group()
-    scolor.add_argument("--color", dest="color", action="store_true", default=None)
-    scolor.add_argument("--no-color", dest="color", action="store_false")
+    _add_color_flags(status)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    try:
+        return _dispatch(argv)
+    except BrokenPipeError:
+        # The reader went away (`lintex ... | head`). That is not an error worth a
+        # traceback. Python would still try to flush stdout at exit and complain
+        # again, so point it at /dev/null first.
+        try:
+            os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+        except OSError:
+            pass
+        return EXIT_OK
+    except KeyboardInterrupt:
+        print("\nlintex: interrupted", file=sys.stderr)
+        return 130
+
+
+def _dispatch(argv: Sequence[str] | None) -> int:
     args_list = list(sys.argv[1:] if argv is None else argv)
     if not args_list or (
         args_list[0] not in COMMANDS and args_list[0] not in ("-h", "--help", "--version")
@@ -306,7 +326,7 @@ def _cmd_rules(args: argparse.Namespace) -> int:
     if args.json:
         print(json.dumps(rows, indent=2))
         return EXIT_OK
-    style = Style.detect(sys.stdout)
+    style = Style.detect(sys.stdout, color=args.color)
     width = max(len(r["name"]) for r in rows)
     group = ""
     for r in rows:
@@ -343,7 +363,7 @@ def _cmd_explain(args: argparse.Namespace) -> int:
             f"lintex: unknown rule {args.rule!r}; run `lintex rules` to list them", file=sys.stderr
         )
         return EXIT_USAGE
-    style = Style.detect(sys.stdout)
+    style = Style.detect(sys.stdout, color=args.color)
     sev = rule.default_severity.value
     badge = style.paint(f" {sev} ", "bold", "red" if sev == "error" else "yellow")
     optin = "" if rule.default_enabled else style.paint("  opt-in", "dim")

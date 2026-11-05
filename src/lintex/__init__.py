@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from lintex.config import Config, ConfigError, load_config
 from lintex.engine import Linter, LintResult, lint_paths, lint_source

@@ -7,6 +7,8 @@ severities may change between minor versions as they are tuned on real codebases
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-05
+
 ### Added
 
 - LX101 now flags Python 2 builtins used as bare names (`xrange`, `unicode`, `raw_input`,
@@ -76,5 +78,6 @@ First release.
 - Git pre-commit hook (`lintex install-hook git`) and a `.pre-commit-hooks.yaml`.
 - `python -m lintex.knowledge.sync` to regenerate the typeshed knowledge pack.
 
-[Unreleased]: https://github.com/700799/lintex/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/700799/lintex/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/700799/lintex/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/700799/lintex/releases/tag/v0.1.0

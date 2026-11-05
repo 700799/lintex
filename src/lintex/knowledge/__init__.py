@@ -85,9 +85,17 @@ class ApiEntry:
 
 
 class Knowledge:
-    def __init__(self, apis: dict[str, ApiEntry], methods: dict[str, ApiEntry], sources: dict):
+    def __init__(
+        self,
+        apis: dict[str, ApiEntry],
+        methods: dict[str, ApiEntry],
+        sources: dict,
+        builtins: dict[str, ApiEntry] | None = None,
+    ):
         self.apis = apis
         self.methods = methods
+        #: Bare names that were builtins in Python 2 (`xrange`, `unicode`, ...).
+        self.builtins = builtins or {}
         self.sources = sources
 
     def match_prefix(self, qualified: str) -> tuple[str, ApiEntry] | None:
@@ -102,7 +110,7 @@ class Knowledge:
 
     def counts(self) -> dict[str, int]:
         out: dict[str, int] = {}
-        for entry in (*self.apis.values(), *self.methods.values()):
+        for entry in (*self.apis.values(), *self.methods.values(), *self.builtins.values()):
             out[entry.status] = out.get(entry.status, 0) + 1
         return out
 
@@ -150,7 +158,9 @@ def _load_curated(path: Path) -> tuple[list[ApiEntry], list[ApiEntry], dict]:
                 )
             )
     methods = [_entry(raw, "curated") for raw in data.get("method", [])]
-    return apis, methods, {"curated": {"path": str(path), "entries": len(apis) + len(methods)}}
+    builtins = [_entry(raw, "curated") for raw in data.get("builtin", [])]
+    meta = {"curated": {"path": str(path), "entries": len(apis) + len(methods) + len(builtins)}}
+    return apis, methods, builtins, meta
 
 
 def _load_generated(path: Path) -> tuple[list[ApiEntry], dict]:
@@ -164,12 +174,12 @@ def _load_generated(path: Path) -> tuple[list[ApiEntry], dict]:
 
 @lru_cache(maxsize=1)
 def load() -> Knowledge:
-    curated_apis, methods, sources = _load_curated(CURATED_PATH)
+    curated_apis, methods, builtins, sources = _load_curated(CURATED_PATH)
     generated, gen_sources = _load_generated(TYPESHED_PATH)
     sources.update(gen_sources)
     apis: dict[str, ApiEntry] = {e.name: e for e in generated}
     apis.update({e.name: e for e in curated_apis})  # curated wins
-    return Knowledge(apis, {m.name: m for m in methods}, sources)
+    return Knowledge(apis, {m.name: m for m in methods}, sources, {b.name: b for b in builtins})
 
 
 __all__ = ["ApiEntry", "Knowledge", "load", "parse_version"]

@@ -9,6 +9,16 @@ severities may change between minor versions as they are tuned on real codebases
 
 ### Added
 
+- LX101 now flags Python 2 builtins used as bare names (`xrange`, `unicode`, `raw_input`,
+  `basestring`, `long`, `reduce`, ...), with `--fix` rewrites for the pure renames, and ~70 more
+  Python 2 stdlib modules and functions (`md5`, `BaseHTTPServer`, `string.join`, `types.StringType`).
+- Migration knowledge for the libraries agents get wrong most: pydantic 1 → 2 (`parse_obj_as`,
+  `ConstrainedStr`, `.parse_obj()` → `.model_validate()`), openai 0.x → 1.x (`openai.Audio`,
+  `openai.api_key`), LangChain 0.1 → 0.2+ (`langchain.schema`, `LLMChain`, `initialize_agent`),
+  TensorFlow 1 → 2, plus Django, Flask, Pillow, scikit-learn, matplotlib and pytest removals.
+- The typeshed sync can pull third-party `@deprecated` names from PyPI's `types-*` stub packages
+  (`--stub-packages default`), so the generated pack now covers requests, PyYAML, setuptools,
+  docutils and ~25 more libraries without a typeshed checkout.
 - A Claude Code plugin (`/plugin marketplace add 700799/lintex`, then
   `/plugin install lintex@lintex`) that installs the edit hook plus `/lintex:check`,
   `/lintex:report` and `/lintex:doctor`. The hook finds lintex as a module, on PATH, or via

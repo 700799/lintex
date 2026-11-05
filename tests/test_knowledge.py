@@ -175,8 +175,10 @@ def test_shipped_pack_is_in_sync_with_mypy_typeshed():
     pytest.importorskip("mypy")
     data = sync.build(sync.mypy_typeshed(), via="test")
     shipped = json.loads(Path(knowledge.TYPESHED_PATH).read_text())
-    # Same mypy version => identical entries; a different mypy may know more.
+    # Same mypy version => identical stdlib entries; the shipped pack also carries
+    # third-party entries from PyPI stub packages, which this offline build lacks.
     if shipped["source"]["via"].startswith("mypy ") and shipped["source"]["via"] == (
         f"mypy {__import__('importlib.metadata').metadata.version('mypy')} bundled typeshed"
     ):
-        assert shipped["api"] == data["api"]
+        stdlib_only = [e for e in shipped["api"] if "package" not in e]
+        assert stdlib_only == data["api"]

@@ -692,7 +692,7 @@ package = "NumPy"
 version = "1.24/2.0"
 fix = "Use {replacement}."
 rewrites = { float = "float", int = "int", bool = "bool", object = "object", str = "str", long = "int", unicode = "str", complex = "complex", float_ = "numpy.float64", complex_ = "numpy.complex128", string_ = "numpy.bytes_", unicode_ = "numpy.str_", NaN = "numpy.nan", NAN = "numpy.nan", Inf = "numpy.inf", Infinity = "numpy.inf", PINF = "numpy.inf", product = "numpy.prod", cumproduct = "numpy.cumprod", alltrue = "numpy.all", sometrue = "numpy.any", round_ = "numpy.round" }
-names = { float = "the builtin `float` (or `numpy.float64`)", int = "the builtin `int` (or `numpy.int64`)", bool = "the builtin `bool` (or `numpy.bool_`)", object = "the builtin `object`", str = "the builtin `str`", long = "the builtin `int`", unicode = "the builtin `str`", complex = "the builtin `complex`", float_ = "`numpy.float64`", complex_ = "`numpy.complex128`", string_ = "`numpy.bytes_`", unicode_ = "`numpy.str_`", NaN = "`numpy.nan`", NAN = "`numpy.nan`", Inf = "`numpy.inf`", Infinity = "`numpy.inf`", PINF = "`numpy.inf`", NINF = "`-numpy.inf`", product = "`numpy.prod`", cumproduct = "`numpy.cumprod`", alltrue = "`numpy.all`", sometrue = "`numpy.any`", round_ = "`numpy.round`", asfarray = "`numpy.asarray(x, dtype=float)`" }
+names = { float = "the builtin `float` (or `numpy.float64`)", int = "the builtin `int` (or `numpy.int64`)", bool = "the builtin `bool` (or `numpy.bool_`)", object = "the builtin `object`", str = "the builtin `str`", long = "the builtin `int`", unicode = "the builtin `str`", complex = "the builtin `complex`", float_ = "`numpy.float64`", complex_ = "`numpy.complex128`", string_ = "`numpy.bytes_`", unicode_ = "`numpy.str_`", NaN = "`numpy.nan`", NAN = "`numpy.nan`", Inf = "`numpy.inf`", Infinity = "`numpy.inf`", PINF = "`numpy.inf`", NINF = "`-numpy.inf`", product = "`numpy.prod`", cumproduct = "`numpy.cumprod`", alltrue = "`numpy.all`", sometrue = "`numpy.any`", round_ = "`numpy.round`", asfarray = "`numpy.asarray(x, dtype=float)`", asscalar = "`arr.item()`", rank = "`numpy.ndim`", typeDict = "`numpy.sctypeDict`" }
 
 # -- Methods: wrong on any receiver ----------------------------------------------
 
@@ -767,3 +767,1125 @@ status = "removed"
 package = "pandas"
 version = "1.0"
 fix = "Use `.to_numpy()`."
+
+# -- Python 2 builtins (bare names) ----------------------------------------------
+
+[[builtin]]
+name = "xrange"
+status = "py2"
+rewrite = "range"
+fix = "Use `range`."
+
+[[builtin]]
+name = "raw_input"
+status = "py2"
+rewrite = "input"
+fix = "Use `input`."
+
+[[builtin]]
+name = "unicode"
+status = "py2"
+rewrite = "str"
+fix = "Use `str`."
+
+[[builtin]]
+name = "basestring"
+status = "py2"
+rewrite = "str"
+fix = "Use `str` (or `(str, bytes)` in an isinstance check)."
+
+[[builtin]]
+name = "long"
+status = "py2"
+rewrite = "int"
+fix = "Use `int`."
+
+[[builtin]]
+name = "unichr"
+status = "py2"
+rewrite = "chr"
+fix = "Use `chr`."
+
+[[builtin]]
+name = "reduce"
+status = "py2"
+fix = "Use `functools.reduce` (`from functools import reduce`)."
+
+[[builtin]]
+name = "execfile"
+status = "py2"
+fix = "Use `runpy.run_path(path)`, or `exec(open(path).read())`."
+
+[[builtin]]
+name = "reload"
+status = "py2"
+fix = "Use `importlib.reload(module)`."
+
+[[builtin]]
+name = "cmp"
+status = "py2"
+fix = "Use `(a > b) - (a < b)`, or `functools.cmp_to_key` for sorting."
+
+[[builtin]]
+name = "file"
+status = "py2"
+fix = "Use `open()`."
+
+[[builtin]]
+name = "apply"
+status = "py2"
+fix = "Call the function directly: `f(*args, **kwargs)`."
+
+[[builtin]]
+name = "buffer"
+status = "py2"
+fix = "Use `memoryview`."
+
+[[builtin]]
+name = "intern"
+status = "py2"
+fix = "Use `sys.intern`."
+
+[[builtin]]
+name = "coerce"
+status = "py2"
+fix = "Remove it; Python 3 has no `coerce()`, arithmetic coerces on its own."
+
+# -- Python 2 standard library modules --------------------------------------------
+
+[[api]]
+name = "thread"
+status = "py2"
+fix = "Use `threading` (or `_thread` for the low-level API)."
+
+[[api]]
+name = "md5"
+status = "py2"
+fix = "Use `hashlib.md5`."
+
+[[api]]
+name = "sha"
+status = "py2"
+fix = "Use `hashlib.sha1`."
+
+[[api]]
+name = "sets"
+status = "py2"
+fix = "Use the builtin `set`."
+
+[[api]]
+name = "exceptions"
+status = "py2"
+fix = "Exceptions are builtins; drop the import."
+
+[[api]]
+name = "popen2"
+status = "py2"
+fix = "Use `subprocess.Popen` / `subprocess.run`."
+
+[[api]]
+name = "anydbm"
+status = "py2"
+fix = "Use `dbm`."
+
+[[api]]
+name = "dumbdbm"
+status = "py2"
+fix = "Use `dbm.dumb`."
+
+[[api]]
+name = "gdbm"
+status = "py2"
+fix = "Use `dbm.gnu`."
+
+[[api]]
+name = "dbhash"
+status = "py2"
+fix = "Use `dbm`."
+
+[[api]]
+name = "whichdb"
+status = "py2"
+fix = "Use `dbm.whichdb`."
+
+[[api]]
+name = "rfc822"
+status = "py2"
+fix = "Use `email.message` / `email.parser`."
+
+[[api]]
+name = "mimetools"
+status = "py2"
+fix = "Use `email` and `mimetypes`."
+
+[[api]]
+name = "htmllib"
+status = "py2"
+fix = "Use `html.parser`."
+
+[[api]]
+name = "sgmllib"
+status = "py2"
+fix = "Use `html.parser`."
+
+[[api]]
+name = "robotparser"
+status = "py2"
+fix = "Use `urllib.robotparser`."
+
+[[api]]
+name = "BaseHTTPServer"
+status = "py2"
+fix = "Use `http.server`."
+
+[[api]]
+name = "SimpleHTTPServer"
+status = "py2"
+fix = "Use `http.server`."
+
+[[api]]
+name = "CGIHTTPServer"
+status = "py2"
+fix = "Use `http.server` (CGI support was removed in 3.13)."
+
+[[api]]
+name = "xmlrpclib"
+status = "py2"
+fix = "Use `xmlrpc.client`."
+
+[[api]]
+name = "SimpleXMLRPCServer"
+status = "py2"
+fix = "Use `xmlrpc.server`."
+
+[[api]]
+name = "DocXMLRPCServer"
+status = "py2"
+fix = "Use `xmlrpc.server`."
+
+[[api]]
+name = "copy_reg"
+status = "py2"
+fix = "Use `copyreg`."
+
+[[api]]
+name = "_winreg"
+status = "py2"
+fix = "Use `winreg`."
+
+[[api]]
+name = "Cookie"
+status = "py2"
+fix = "Use `http.cookies`."
+
+[[api]]
+name = "UserDict"
+status = "py2"
+fix = "Use `collections.UserDict`."
+
+[[api]]
+name = "UserList"
+status = "py2"
+fix = "Use `collections.UserList`."
+
+[[api]]
+name = "UserString"
+status = "py2"
+fix = "Use `collections.UserString`."
+
+[[api]]
+name = "markupbase"
+status = "py2"
+fix = "Use `_markupbase` (private) or `html.parser`."
+
+[[api]]
+name = "ttk"
+status = "py2"
+fix = "Use `tkinter.ttk`."
+
+[[api]]
+name = "Tix"
+status = "py2"
+fix = "Use `tkinter.ttk` (tix was removed in 3.13)."
+
+[[api]]
+name = "ScrolledText"
+status = "py2"
+fix = "Use `tkinter.scrolledtext`."
+
+[[api]]
+name = "tkMessageBox"
+status = "py2"
+fix = "Use `tkinter.messagebox`."
+
+[[api]]
+name = "tkFileDialog"
+status = "py2"
+fix = "Use `tkinter.filedialog`."
+
+[[api]]
+name = "tkSimpleDialog"
+status = "py2"
+fix = "Use `tkinter.simpledialog`."
+
+[[api]]
+name = "tkColorChooser"
+status = "py2"
+fix = "Use `tkinter.colorchooser`."
+
+[[api]]
+name = "tkFont"
+status = "py2"
+fix = "Use `tkinter.font`."
+
+[[api]]
+name = "Dialog"
+status = "py2"
+fix = "Use `tkinter.dialog`."
+
+[[api]]
+name = "FileDialog"
+status = "py2"
+fix = "Use `tkinter.filedialog`."
+
+[[api]]
+name = "dircache"
+status = "py2"
+fix = "Use `os.listdir` (and `os.stat` if you need timestamps)."
+
+[[api]]
+name = "imputil"
+status = "py2"
+fix = "Use `importlib`."
+
+[[api]]
+name = "statvfs"
+status = "py2"
+fix = "Use `os.statvfs` and `os.statvfs_result` attributes."
+
+[[api]]
+name = "urllib.urlretrieve"
+status = "py2"
+fix = "Use `urllib.request.urlretrieve`."
+
+[[api]]
+name = "urllib.quote_plus"
+status = "py2"
+fix = "Use `urllib.parse.quote_plus`."
+
+[[api]]
+name = "urllib.unquote_plus"
+status = "py2"
+fix = "Use `urllib.parse.unquote_plus`."
+
+[[api]]
+name = "urllib.urlparse"
+status = "py2"
+fix = "Use `urllib.parse.urlparse`."
+
+[[api]]
+name = "urllib.splitquery"
+status = "py2"
+fix = "Use `urllib.parse.urlparse`."
+
+[[api]]
+name = "string.join"
+status = "py2"
+fix = "Use the `str` method: `sep.join(parts)`."
+
+[[api]]
+name = "string.split"
+status = "py2"
+fix = "Use the `str` method: `s.split(sep)`."
+
+[[api]]
+name = "string.upper"
+status = "py2"
+fix = "Use the `str` method: `s.upper()`."
+
+[[api]]
+name = "string.lower"
+status = "py2"
+fix = "Use the `str` method: `s.lower()`."
+
+[[api]]
+name = "string.strip"
+status = "py2"
+fix = "Use the `str` method: `s.strip()`."
+
+[[api]]
+name = "string.replace"
+status = "py2"
+fix = "Use the `str` method: `s.replace(old, new)`."
+
+[[api]]
+name = "string.find"
+status = "py2"
+fix = "Use the `str` method: `s.find(sub)`."
+
+[[api]]
+name = "string.atoi"
+status = "py2"
+fix = "Use `int(s)`."
+
+[[api]]
+name = "string.atof"
+status = "py2"
+fix = "Use `float(s)`."
+
+[[api]]
+name = "tensorflow.estimator"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Estimators are deprecated; use Keras `Model.fit` or a custom training loop."
+
+# -- Python 2 `types` constants and misc ------------------------------------------
+
+[[api]]
+name = "types.StringType"
+status = "py2"
+fix = "Use `str`."
+
+[[api]]
+name = "types.StringTypes"
+status = "py2"
+fix = "Use `str` (or `(str, bytes)`)."
+
+[[api]]
+name = "types.UnicodeType"
+status = "py2"
+fix = "Use `str`."
+
+[[api]]
+name = "types.IntType"
+status = "py2"
+fix = "Use `int`."
+
+[[api]]
+name = "types.LongType"
+status = "py2"
+fix = "Use `int`."
+
+[[api]]
+name = "types.FloatType"
+status = "py2"
+fix = "Use `float`."
+
+[[api]]
+name = "types.ListType"
+status = "py2"
+fix = "Use `list`."
+
+[[api]]
+name = "types.DictType"
+status = "py2"
+fix = "Use `dict`."
+
+[[api]]
+name = "types.TupleType"
+status = "py2"
+fix = "Use `tuple`."
+
+[[api]]
+name = "types.BooleanType"
+status = "py2"
+fix = "Use `bool`."
+
+[[api]]
+name = "types.ClassType"
+status = "py2"
+fix = "Old-style classes are gone; use `type`."
+
+[[api]]
+name = "types.InstanceType"
+status = "py2"
+fix = "Old-style classes are gone; use `object`."
+
+[[api]]
+name = "types.FileType"
+status = "py2"
+fix = "Use `io.IOBase`."
+
+[[api]]
+name = "types.DictProxyType"
+status = "py2"
+fix = "Use `types.MappingProxyType`."
+
+[[api]]
+name = "inspect.getmoduleinfo"
+status = "py2"
+fix = "Use `inspect.getmodulename` and the `importlib.machinery` suffix lists."
+
+# -- Third-party: pydantic 2 -------------------------------------------------------
+
+[[api]]
+name = "pydantic.parse_obj_as"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+fix = "Use `TypeAdapter(T).validate_python(data)` (`from pydantic import TypeAdapter`)."
+
+[[api]]
+name = "pydantic.validate_arguments"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+fix = "Use `@validate_call` (`from pydantic import validate_call`)."
+
+[[api]]
+name = "pydantic.schema_of"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+fix = "Use `TypeAdapter(T).json_schema()`."
+
+[[api]]
+name = "pydantic.schema_json_of"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+fix = "Use `json.dumps(TypeAdapter(T).json_schema())`."
+
+[[api]]
+name = "pydantic.error_wrappers"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Use `from pydantic import ValidationError`."
+
+[[api]]
+name = "pydantic.Required"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Use `Field(...)` or an annotation without a default; `Required` is gone."
+
+[[api]]
+name = "pydantic.PydanticValueError"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Raise `ValueError` inside the validator; pydantic wraps it into a `ValidationError`."
+
+[[api]]
+name = "pydantic.tools"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Use `pydantic.TypeAdapter` for `parse_obj_as` / `schema_of`."
+
+[[api]]
+name = "pydantic.json"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Use `model.model_dump_json()` or `pydantic_core.to_jsonable_python(obj)`."
+
+[[api]]
+name = "pydantic.generics"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Subclass `BaseModel` together with `typing.Generic[T]`; `GenericModel` is gone."
+
+[[api]]
+name = "pydantic.ConstrainedStr"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Use `Annotated[..., Field(...)]`, e.g. `Annotated[str, StringConstraints(min_length=1)]` or `Annotated[int, Field(gt=0)]`; `ConstrainedStr` is gone."
+
+[[api]]
+name = "pydantic.ConstrainedInt"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Use `Annotated[..., Field(...)]`, e.g. `Annotated[str, StringConstraints(min_length=1)]` or `Annotated[int, Field(gt=0)]`; `ConstrainedInt` is gone."
+
+[[api]]
+name = "pydantic.ConstrainedFloat"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Use `Annotated[..., Field(...)]`, e.g. `Annotated[str, StringConstraints(min_length=1)]` or `Annotated[int, Field(gt=0)]`; `ConstrainedFloat` is gone."
+
+[[api]]
+name = "pydantic.ConstrainedList"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Use `Annotated[..., Field(...)]`, e.g. `Annotated[str, StringConstraints(min_length=1)]` or `Annotated[int, Field(gt=0)]`; `ConstrainedList` is gone."
+
+[[api]]
+name = "pydantic.ConstrainedBytes"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Use `Annotated[..., Field(...)]`, e.g. `Annotated[str, StringConstraints(min_length=1)]` or `Annotated[int, Field(gt=0)]`; `ConstrainedBytes` is gone."
+
+[[api]]
+name = "pydantic.ConstrainedDecimal"
+status = "removed"
+package = "pydantic"
+version = "2.0"
+fix = "Use `Annotated[..., Field(...)]`, e.g. `Annotated[str, StringConstraints(min_length=1)]` or `Annotated[int, Field(gt=0)]`; `ConstrainedDecimal` is gone."
+
+[[api]]
+name = "pydantic.v1.BaseSettings"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+fix = "`pip install pydantic-settings` and `from pydantic_settings import BaseSettings` (the v1 shim is a stop-gap)."
+
+[[method]]
+name = "parse_obj"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+rewrite = "model_validate"
+fix = "Use `Model.model_validate(data)`."
+
+[[method]]
+name = "parse_raw"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+rewrite = "model_validate_json"
+fix = "Use `Model.model_validate_json(text)`."
+
+[[method]]
+name = "parse_file"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+fix = "Use `Model.model_validate_json(Path(p).read_text())`."
+
+[[method]]
+name = "from_orm"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+fix = "Use `Model.model_validate(obj, from_attributes=True)` (or `model_config = ConfigDict(from_attributes=True)`)."
+
+[[method]]
+name = "schema_json"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+fix = "Use `json.dumps(Model.model_json_schema())`."
+
+[[method]]
+name = "update_forward_refs"
+status = "deprecated"
+package = "pydantic"
+version = "2.0"
+rewrite = "model_rebuild"
+fix = "Use `Model.model_rebuild()`."
+
+# -- Third-party: openai 1.x --------------------------------------------------------
+
+[[api]]
+name = "openai.util"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "An internal module that is not part of the 1.x API."
+
+[[api]]
+name = "openai.Audio"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Use the client: `client = OpenAI(); client.audio.transcriptions.create(...)`."
+
+[[api]]
+name = "openai.File"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Use the client: `OpenAI().files.create(...)`."
+
+[[api]]
+name = "openai.FineTune"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Use the client: `OpenAI().fine_tuning.jobs.create(...)`."
+
+[[api]]
+name = "openai.FineTuningJob"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Use the client: `OpenAI().fine_tuning.jobs`."
+
+[[api]]
+name = "openai.Model"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Use the client: `OpenAI().models.list()` / `.retrieve(id)`."
+
+[[api]]
+name = "openai.Moderation"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Use the client: `OpenAI().moderations.create(...)`."
+
+[[api]]
+name = "openai.Engine"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "Engines are gone; use `OpenAI().models`."
+
+[[api]]
+name = "openai.Edit"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "The edits endpoint is gone; use `OpenAI().chat.completions.create(...)`."
+
+[[api]]
+name = "openai.Deployment"
+status = "removed"
+package = "openai"
+version = "1.0"
+fix = "For Azure, use the `AzureOpenAI(...)` client with `azure_deployment=`."
+
+[[api]]
+name = "openai.api_key"
+status = "deprecated"
+package = "openai"
+version = "1.0"
+message = "is the legacy module-level configuration from openai < 1.0"
+fix = "Pass it to the client (`OpenAI(api_key=...)`) or set the `OPENAI_API_KEY` environment variable."
+
+[[api]]
+name = "openai.api_base"
+status = "deprecated"
+package = "openai"
+version = "1.0"
+message = "is the legacy module-level configuration from openai < 1.0"
+fix = "Use `OpenAI(base_url=...)`."
+
+[[api]]
+name = "openai.organization"
+status = "deprecated"
+package = "openai"
+version = "1.0"
+message = "is the legacy module-level configuration from openai < 1.0"
+fix = "Use `OpenAI(organization=...)`."
+
+[[api]]
+name = "openai.api_type"
+status = "deprecated"
+package = "openai"
+version = "1.0"
+message = "is the legacy module-level configuration from openai < 1.0"
+fix = "Use the `AzureOpenAI(...)` client instead of setting `api_type`."
+
+[[api]]
+name = "openai.api_version"
+status = "deprecated"
+package = "openai"
+version = "1.0"
+message = "is the legacy module-level configuration from openai < 1.0"
+fix = "Use `AzureOpenAI(api_version=...)`."
+
+# -- Third-party: LangChain 0.2+ ----------------------------------------------------
+
+[[api]]
+name = "langchain.schema"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "Import from `langchain_core`, e.g. `from langchain_core.messages import HumanMessage` or `from langchain_core.documents import Document`."
+
+[[api]]
+name = "langchain.prompts"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "Use `from langchain_core.prompts import ChatPromptTemplate, PromptTemplate`."
+
+[[api]]
+name = "langchain.text_splitter"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "`pip install langchain-text-splitters` and `from langchain_text_splitters import RecursiveCharacterTextSplitter`."
+
+[[api]]
+name = "langchain.vectorstores"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "`pip install langchain-community` and import from `langchain_community.vectorstores` (or the provider package, e.g. `langchain_chroma`)."
+
+[[api]]
+name = "langchain.document_loaders"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "`pip install langchain-community` and import from `langchain_community.document_loaders`."
+
+[[api]]
+name = "langchain.utilities"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "`pip install langchain-community` and import from `langchain_community.utilities`."
+
+[[api]]
+name = "langchain.chat_models"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "Use the provider package (`from langchain_openai import ChatOpenAI`, `from langchain_anthropic import ChatAnthropic`) or `langchain_community.chat_models`."
+
+[[api]]
+name = "langchain.llms"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "Use the provider package (`from langchain_openai import OpenAI`) or `langchain_community.llms`."
+
+[[api]]
+name = "langchain.embeddings"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "Use the provider package (`from langchain_openai import OpenAIEmbeddings`) or `langchain_community.embeddings`."
+
+[[api]]
+name = "langchain.chains.LLMChain"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "Compose with LCEL: `chain = prompt | llm` and call `chain.invoke({...})`."
+
+[[api]]
+name = "langchain.agents.initialize_agent"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "Use `create_tool_calling_agent` / `create_react_agent` with `AgentExecutor`, or a LangGraph prebuilt agent."
+
+[[api]]
+name = "langchain.memory.ConversationBufferMemory"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "Use `RunnableWithMessageHistory`, or LangGraph persistence (checkpointers)."
+
+[[api]]
+name = "langchain.callbacks.get_openai_callback"
+status = "deprecated"
+package = "langchain"
+version = "0.2"
+fix = "Use `from langchain_community.callbacks import get_openai_callback`."
+
+# -- Third-party: others agents get wrong -------------------------------------------
+
+[[api]]
+name = "requests.packages.urllib3"
+status = "deprecated"
+package = "requests"
+version = "2.16"
+fix = "`import urllib3` directly; `requests.packages` is a compatibility shim."
+
+[[api]]
+name = "sklearn.preprocessing.Imputer"
+status = "removed"
+package = "scikit-learn"
+version = "0.22"
+fix = "Use `from sklearn.impute import SimpleImputer`."
+
+[[api]]
+name = "sklearn.utils.testing"
+status = "removed"
+package = "scikit-learn"
+version = "0.24"
+fix = "Use plain pytest / numpy assertions; this module became private."
+
+[[api]]
+name = "sklearn.metrics.jaccard_similarity_score"
+status = "removed"
+package = "scikit-learn"
+version = "0.23"
+rewrite = "sklearn.metrics.jaccard_score"
+fix = "Use `sklearn.metrics.jaccard_score`."
+
+[[api]]
+name = "sklearn.datasets.load_boston"
+status = "removed"
+package = "scikit-learn"
+version = "1.2"
+fix = "Use `fetch_california_housing()` (the Boston dataset was removed for ethical reasons)."
+
+[[api]]
+name = "sklearn.externals.six"
+status = "removed"
+package = "scikit-learn"
+version = "0.23"
+fix = "`pip install six` and `import six`, or drop the Python 2 compatibility code."
+
+[[api]]
+name = "sklearn.ensemble.forest"
+status = "removed"
+package = "scikit-learn"
+version = "0.24"
+fix = "Import from `sklearn.ensemble` directly."
+
+[[api]]
+name = "matplotlib.cm.get_cmap"
+status = "deprecated"
+package = "matplotlib"
+version = "3.7"
+fix = "Use `matplotlib.colormaps[name]` (or `matplotlib.colormaps.get_cmap(name)`)."
+
+[[api]]
+name = "matplotlib.pyplot.hold"
+status = "removed"
+package = "matplotlib"
+version = "3.0"
+fix = "Remove it; axes always hold since matplotlib 2.0."
+
+[[api]]
+name = "django.core.urlresolvers"
+status = "removed"
+package = "Django"
+version = "2.0"
+fix = "Use `django.urls` (`from django.urls import reverse, resolve`)."
+
+[[api]]
+name = "django.utils.encoding.smart_text"
+status = "removed"
+package = "Django"
+version = "4.0"
+rewrite = "django.utils.encoding.smart_str"
+fix = "Use `smart_str`."
+
+[[api]]
+name = "django.utils.translation.ugettext_noop"
+status = "removed"
+package = "Django"
+version = "4.0"
+rewrite = "django.utils.translation.gettext_noop"
+fix = "Use `gettext_noop`."
+
+[[api]]
+name = "django.shortcuts.render_to_response"
+status = "removed"
+package = "Django"
+version = "3.0"
+fix = "Use `render(request, template, context)`."
+
+[[api]]
+name = "django.db.models.NullBooleanField"
+status = "removed"
+package = "Django"
+version = "4.0"
+fix = "Use `BooleanField(null=True)`."
+
+[[api]]
+name = "django.contrib.postgres.fields.JSONField"
+status = "removed"
+package = "Django"
+version = "4.0"
+fix = "Use `django.db.models.JSONField`."
+
+[[api]]
+name = "django.utils.timezone.utc"
+status = "removed"
+package = "Django"
+version = "5.0"
+fix = "Use `datetime.timezone.utc`."
+
+[[method]]
+name = "is_ajax"
+status = "removed"
+package = "Django"
+version = "4.0"
+fix = "Check the header yourself: `request.headers.get('x-requested-with') == 'XMLHttpRequest'`."
+
+[[api]]
+name = "flask.ext"
+status = "removed"
+package = "Flask"
+version = "1.0"
+fix = "Import the extension package directly (`import flask_sqlalchemy`, not `flask.ext.sqlalchemy`)."
+
+[[api]]
+name = "flask._app_ctx_stack"
+status = "removed"
+package = "Flask"
+version = "2.3"
+fix = "Use `flask.g` / `flask.current_app`; the context stacks are gone."
+
+[[api]]
+name = "flask._request_ctx_stack"
+status = "removed"
+package = "Flask"
+version = "2.3"
+fix = "Use `flask.request` / `flask.session`; the context stacks are gone."
+
+[[method]]
+name = "before_first_request"
+status = "removed"
+package = "Flask"
+version = "2.3"
+fix = "Run startup code inside `with app.app_context():` at startup, or guard a `@app.before_request` handler with a flag."
+
+[[api]]
+name = "PIL.Image.ANTIALIAS"
+status = "removed"
+package = "Pillow"
+version = "10.0"
+fix = "Use `Image.Resampling.LANCZOS`."
+
+[[api]]
+name = "PIL.Image.LINEAR"
+status = "removed"
+package = "Pillow"
+version = "10.0"
+fix = "Use `Image.Resampling.BILINEAR`."
+
+[[api]]
+name = "PIL.Image.CUBIC"
+status = "removed"
+package = "Pillow"
+version = "10.0"
+fix = "Use `Image.Resampling.BICUBIC`."
+
+[[method]]
+name = "textsize"
+status = "removed"
+package = "Pillow"
+version = "10.0"
+fix = "Use `draw.textbbox((0, 0), text, font=font)` for a box or `draw.textlength(text, font=font)` for a width."
+
+[[api]]
+name = "pytest.yield_fixture"
+status = "deprecated"
+package = "pytest"
+version = "6.2"
+rewrite = "pytest.fixture"
+fix = "Use `@pytest.fixture`; `yield` works there too."
+
+[[api]]
+name = "pytest.config"
+status = "removed"
+package = "pytest"
+version = "5.0"
+fix = "Use the `pytestconfig` fixture (or `request.config`)."
+
+# -- TensorFlow 1.x API ---------------------------------------------------------------
+
+[[api]]
+name = "tensorflow.random_normal"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `tf.random.normal`."
+
+[[api]]
+name = "tensorflow.random_uniform"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `tf.random.uniform`."
+
+[[api]]
+name = "tensorflow.log"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `tf.math.log`."
+
+[[api]]
+name = "tensorflow.global_variables_initializer"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Not needed: TF2 runs eagerly; variables are initialised on creation."
+
+[[api]]
+name = "tensorflow.layers"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `tf.keras.layers`."
+
+[[api]]
+name = "tensorflow.app"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `absl.app` (`pip install absl-py`), or a plain `if __name__ == '__main__':` block."
+
+[[api]]
+name = "tensorflow.flags"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `absl.flags` or `argparse`."
+
+[[api]]
+name = "tensorflow.logging"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `absl.logging` or the standard `logging` module."
+
+[[api]]
+name = "tensorflow.get_variable"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `tf.Variable`, or a Keras layer's `add_weight`."
+
+[[api]]
+name = "tensorflow.reset_default_graph"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Not needed in TF2 (no global graph); remove it."
+
+[[api]]
+name = "tensorflow.variable_scope"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `tf.Module` or Keras layers for variable namespacing."
+
+[[api]]
+name = "tensorflow.train.AdamOptimizer"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `tf.keras.optimizers.Adam`."
+
+[[api]]
+name = "tensorflow.train.GradientDescentOptimizer"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `tf.keras.optimizers.SGD`."
+
+[[api]]
+name = "tensorflow.train.RMSPropOptimizer"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `tf.keras.optimizers.RMSprop`."
+
+[[api]]
+name = "tensorflow.nn.rnn_cell"
+status = "removed"
+package = "TensorFlow"
+version = "2.0"
+fix = "Use `tf.keras.layers.LSTM` / `GRU` / `SimpleRNN`."

@@ -2,9 +2,40 @@
  "source": {
   "name": "typeshed",
   "via": "mypy 2.4.0 bundled typeshed",
-  "generated": "2026-10-18T20:38:18+00:00",
+  "generated": "2026-11-05T03:19:26+00:00",
   "latest_python": "3.15",
-  "entries": 210
+  "entries": 263,
+  "stub_packages": [
+   "types_cachetools-7.0.0.20260713-py3-none-any.whl",
+   "types_colorama-0.4.15.20260508-py3-none-any.whl",
+   "types_deprecated-1.3.1.20260928-py3-none-any.whl",
+   "types_docutils-0.23.0.20261030-py3-none-any.whl",
+   "types_html5lib-1.1.11.20260518-py3-none-any.whl",
+   "types_jsonschema-4.26.0.20261006-py3-none-any.whl",
+   "types_markdown-3.11.2.20261029-py3-none-any.whl",
+   "types_mock-5.2.0.20260518-py3-none-any.whl",
+   "types_openpyxl-3.1.5.20261017-py3-none-any.whl",
+   "types_paramiko-5.1.0.20261030-py3-none-any.whl",
+   "types_pexpect-4.9.0.20260518-py3-none-any.whl",
+   "types_protobuf-7.35.1.20260906-py3-none-any.whl",
+   "types_psutil-7.2.2.20260906-py3-none-any.whl",
+   "types_pyOpenSSL-24.1.0.20240722-py3-none-any.whl",
+   "types_pygments-2.21.0.20260819-py3-none-any.whl",
+   "types_python_dateutil-2.9.0.20261104-py3-none-any.whl",
+   "types_python_slugify-8.0.2.20240310-py3-none-any.whl",
+   "types_pytz-2026.6.0.20261031-py3-none-any.whl",
+   "types_pyyaml-6.0.12.20261103-py3-none-any.whl",
+   "types_regex-2026.9.29.20261030-py3-none-any.whl",
+   "types_requests-2.33.0.20261030-py3-none-any.whl",
+   "types_setuptools-84.2.0.20261104-py3-none-any.whl",
+   "types_simplejson-4.2.0.20261104-py3-none-any.whl",
+   "types_six-1.17.0.20261008-py3-none-any.whl",
+   "types_tabulate-0.10.0.20261006-py3-none-any.whl",
+   "types_toml-0.10.8.20260518-py3-none-any.whl",
+   "types_tqdm-4.70.0.20261102-py3-none-any.whl",
+   "types_ujson-5.10.0.20250822-py3-none-any.whl",
+   "types_xmltodict-1.0.1.20260518-py3-none-any.whl"
+  ]
  },
  "api": [
   {
@@ -1243,6 +1274,324 @@
    "status": "deprecated",
    "fix": "Deprecated since Python 3.10; removed in Python 3.15. Use `exec_module()` instead.",
    "version": "3.10"
+  },
+  {
+   "name": "requests-stubs.adapters.HTTPAdapter.get_connection",
+   "status": "deprecated",
+   "package": "requests",
+   "fix": "Use get_connection_with_tls_context() instead."
+  },
+  {
+   "name": "setuptools-stubs.command.develop.develop.initialize_options",
+   "status": "deprecated",
+   "package": "setuptools",
+   "fix": "develop command is deprecated. Please avoid running `setup.py` and `develop`. Instead, use standards-based tools like pip or uv."
+  },
+  {
+   "name": "setuptools-stubs.command.test.test",
+   "status": "deprecated",
+   "package": "setuptools",
+   "fix": "The test command is disabled and references to it are deprecated. Please remove any references to `setuptools.command.test` in all supported versions of the affected package."
+  },
+  {
+   "name": "setuptools-stubs.installer.fetch_build_egg",
+   "status": "deprecated",
+   "package": "setuptools",
+   "fix": "\n    `setuptools.installer` and `fetch_build_eggs` are deprecated.\n    Requirements should be satisfied by a PEP 517 installer.\n    If you are using pip, you can try `pip install --use-pep517`.\n    "
+  },
+  {
+   "name": "dateutil-stubs.zoneinfo.gettz",
+   "status": "deprecated",
+   "package": "python-dateutil",
+   "fix": "zoneinfo.gettz() will be removed in future versions, to use the dateutil-provided zoneinfo files, instantiate a ZoneInfoFile object and use ZoneInfoFile.zones.get() instead."
+  },
+  {
+   "name": "dateutil-stubs.zoneinfo.gettz_db_metadata",
+   "status": "deprecated",
+   "package": "python-dateutil",
+   "fix": "zoneinfo.gettz_db_metadata() will be removed in future versions, to use the dateutil-provided zoneinfo files, ZoneInfoFile object and query the 'metadata' attribute instead."
+  },
+  {
+   "name": "markdown-stubs.extensions.abbr.AbbrInlineProcessor",
+   "status": "deprecated",
+   "package": "Markdown",
+   "fix": "This class will be removed in the future; use `AbbrTreeprocessor` instead."
+  },
+  {
+   "name": "markdown-stubs.extensions.abbr.AbbrPreprocessor",
+   "status": "deprecated",
+   "package": "Markdown",
+   "fix": "This class will be removed in the future; use `AbbrTreeprocessor` instead."
+  },
+  {
+   "name": "markdown-stubs.extensions.toc.get_name",
+   "status": "deprecated",
+   "package": "Markdown",
+   "fix": "Use `render_inner_html` and `striptags` instead."
+  },
+  {
+   "name": "markdown-stubs.extensions.toc.stashedHTML2text",
+   "status": "deprecated",
+   "package": "Markdown",
+   "fix": "Use `run_postprocessors`, `render_inner_html` and/or `striptags` instead."
+  },
+  {
+   "name": "markdown-stubs.postprocessors.UnescapePostprocessor",
+   "status": "deprecated",
+   "package": "Markdown",
+   "fix": "This class is deprecated and will be removed in the future; use [`UnescapeTreeprocessor`][markdown.treeprocessors.UnescapeTreeprocessor] instead."
+  },
+  {
+   "name": "docutils-stubs.core.Publisher.set_components",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `Publisher.set_components()` will be removed in Docutils 2.0."
+  },
+  {
+   "name": "docutils-stubs.core.publish_cmdline_to_binary",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `publish_cmdline_to_binary()` is deprecated  by `publish_cmdline()` and will be removed in Docutils 0.24."
+  },
+  {
+   "name": "docutils-stubs.frontend.Option",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `frontend.Option` class will be removed in Docutils 2.0 or later."
+  },
+  {
+   "name": "docutils-stubs.frontend.OptionParser",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `frontend.OptionParser` class will be replaced by a subclass of `argparse.ArgumentParser` in Docutils 2.0 or later."
+  },
+  {
+   "name": "docutils-stubs.frontend.Values",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `frontend.Values` class will be removed in Docutils 2.0 or later."
+  },
+  {
+   "name": "docutils-stubs.frontend.make_one_path_absolute",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `frontend.make_one_path_absolute` will be removed in Docutils 2.0 or later."
+  },
+  {
+   "name": "docutils-stubs.frontend.read_config_file",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "Deprecated and will be removed with the switch to from optparse to argparse."
+  },
+  {
+   "name": "docutils-stubs.frontend.store_multiple",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "Deprecated and will be removed with the switch to from optparse to argparse."
+  },
+  {
+   "name": "docutils-stubs.io.BinaryFileOutput",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `BinaryFileOutput` is deprecated by `FileOutput` and will be removed in Docutils 0.24."
+  },
+  {
+   "name": "docutils-stubs.io.Input.determine_encoding_from_data",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "Deprecated and will be removed in Docutils 1.0."
+  },
+  {
+   "name": "docutils-stubs.nodes.Node.traverse",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `nodes.Node.traverse()` is deprecated. Use `Node.findall()` instead."
+  },
+  {
+   "name": "docutils-stubs.nodes.document.set_name_id_map",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "`nodes.document.set_name_id_map()` will be removed in Docutils 1.0."
+  },
+  {
+   "name": "docutils-stubs.parsers.recommonmark_wrapper.Parser",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `recommonmark` package is unmaintained and deprecated; will be removed in Docutils 1.0."
+  },
+  {
+   "name": "docutils-stubs.parsers.recommonmark_wrapper.is_literal",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `recommonmark` package is unmaintained and deprecated; will be removed in Docutils 1.0."
+  },
+  {
+   "name": "docutils-stubs.parsers.recommonmark_wrapper.pending_xref",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "The `recommonmark` package is unmaintained and deprecated; will be removed in Docutils 1.0."
+  },
+  {
+   "name": "docutils-stubs.parsers.rst.directives.tables.CSVTable.HeaderDialect",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "Deprecated and will be removed in Docutils 1.0."
+  },
+  {
+   "name": "docutils-stubs.parsers.rst.roles.normalized_role_options",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "Deprecated and will be removed in Docutils 2.0, Use `roles.normalize_options()` instead."
+  },
+  {
+   "name": "docutils-stubs.parsers.rst.roles.set_classes",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "Deprecated and will be removed in Docutils 2.0, Use `roles.normalize_options()` instead."
+  },
+  {
+   "name": "docutils-stubs.utils.decode_path",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "Deprecated and will be removed in Docutils 1.0."
+  },
+  {
+   "name": "docutils-stubs.utils.get_stylesheet_reference",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "Deprecated and will be removed in Docutils 1.0. Use `get_stylesheet_list()` instead."
+  },
+  {
+   "name": "docutils-stubs.writers.latex2e.SortableDict",
+   "status": "deprecated",
+   "package": "docutils",
+   "fix": "Deprecated and will be removed in Docutils 0.24."
+  },
+  {
+   "name": "psutil-stubs.Process.connections",
+   "status": "deprecated",
+   "package": "psutil",
+   "fix": "use \"net_connections\" method instead"
+  },
+  {
+   "name": "OpenSSL-stubs.crypto.CRL",
+   "status": "deprecated",
+   "package": "pyOpenSSL",
+   "fix": "CRL support in pyOpenSSL is deprecated. You should use the APIs in cryptography."
+  },
+  {
+   "name": "OpenSSL-stubs.crypto.Revoked",
+   "status": "deprecated",
+   "package": "pyOpenSSL",
+   "fix": "CRL support in pyOpenSSL is deprecated. You should use the APIs in cryptography."
+  },
+  {
+   "name": "OpenSSL-stubs.crypto.X509Extension",
+   "status": "deprecated",
+   "package": "pyOpenSSL",
+   "fix": "X509Extension support in pyOpenSSL is deprecated. You should use the APIs in cryptography."
+  },
+  {
+   "name": "OpenSSL-stubs.crypto.dump_crl",
+   "status": "deprecated",
+   "package": "pyOpenSSL",
+   "fix": "CRL support in pyOpenSSL is deprecated. You should use the APIs in cryptography."
+  },
+  {
+   "name": "OpenSSL-stubs.crypto.load_crl",
+   "status": "deprecated",
+   "package": "pyOpenSSL",
+   "fix": "CRL support in pyOpenSSL is deprecated. You should use the APIs in cryptography."
+  },
+  {
+   "name": "OpenSSL-stubs.crypto.sign",
+   "status": "deprecated",
+   "package": "pyOpenSSL",
+   "fix": "sign() is deprecated. Use the equivalent APIs in cryptography."
+  },
+  {
+   "name": "OpenSSL-stubs.crypto.verify",
+   "status": "deprecated",
+   "package": "pyOpenSSL",
+   "fix": "verify() is deprecated. Use the equivalent APIs in cryptography."
+  },
+  {
+   "name": "jsonschema-stubs.cli.main",
+   "status": "deprecated",
+   "package": "jsonschema",
+   "fix": "The jsonschema CLI is deprecated and will be removed in a future version. Please use check-jsonschema instead."
+  },
+  {
+   "name": "jsonschema-stubs.cli.parse_args",
+   "status": "deprecated",
+   "package": "jsonschema",
+   "fix": "The jsonschema CLI is deprecated and will be removed in a future version. Please use check-jsonschema instead."
+  },
+  {
+   "name": "jsonschema-stubs.cli.run",
+   "status": "deprecated",
+   "package": "jsonschema",
+   "fix": "The jsonschema CLI is deprecated and will be removed in a future version. Please use check-jsonschema instead."
+  },
+  {
+   "name": "jsonschema-stubs.validators.RefResolver",
+   "status": "deprecated",
+   "package": "jsonschema",
+   "fix": "jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need."
+  },
+  {
+   "name": "jsonschema-stubs.validators.RefResolver.in_scope",
+   "status": "deprecated",
+   "package": "jsonschema",
+   "fix": "jsonschema.RefResolver.in_scope is deprecated and will be removed in a future release."
+  },
+  {
+   "name": "openpyxl-stubs.styles.proxy.StyleProxy.copy",
+   "status": "deprecated",
+   "package": "openpyxl",
+   "fix": "Use copy(obj) or cell.obj = cell.obj + other"
+  },
+  {
+   "name": "openpyxl-stubs.workbook.workbook.Workbook.create_named_range",
+   "status": "deprecated",
+   "package": "openpyxl",
+   "fix": "Assign scoped named ranges directly to worksheets or global ones to the workbook. Deprecated in 3.1"
+  },
+  {
+   "name": "openpyxl-stubs.workbook.workbook.Workbook.get_index",
+   "status": "deprecated",
+   "package": "openpyxl",
+   "fix": "Use wb.index(worksheet)"
+  },
+  {
+   "name": "openpyxl-stubs.workbook.workbook.Workbook.get_sheet_by_name",
+   "status": "deprecated",
+   "package": "openpyxl",
+   "fix": "Use wb[sheetname]"
+  },
+  {
+   "name": "openpyxl-stubs.workbook.workbook.Workbook.get_sheet_names",
+   "status": "deprecated",
+   "package": "openpyxl",
+   "fix": "Use wb.sheetnames"
+  },
+  {
+   "name": "openpyxl-stubs.workbook.workbook.Workbook.remove_sheet",
+   "status": "deprecated",
+   "package": "openpyxl",
+   "fix": "Use wb.remove(worksheet) or del wb[sheetname]"
+  },
+  {
+   "name": "openpyxl-stubs.worksheet.worksheet.Worksheet.merged_cell_ranges",
+   "status": "deprecated",
+   "package": "openpyxl",
+   "fix": "Use ws.merged_cells.ranges"
+  },
+  {
+   "name": "html5lib-stubs.filters.sanitizer.Filter",
+   "status": "deprecated",
+   "package": "html5lib",
+   "fix": "html5lib's sanitizer is deprecated; see https://github.com/html5lib/html5lib-python/issues/443"
   }
  ]
 }

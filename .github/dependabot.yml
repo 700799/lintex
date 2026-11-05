@@ -1,0 +1,12 @@
+# Keeps the GitHub Actions we use current. The release logs already warn that
+# the Node 20 majors of actions/checkout and actions/setup-python are deprecated;
+# Dependabot proposes the bumps as PRs, so CI vets each one before it lands.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns: ["*"]

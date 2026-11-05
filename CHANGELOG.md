@@ -7,6 +7,12 @@ severities may change between minor versions as they are tuned on real codebases
 
 ## [Unreleased]
 
+### Fixed
+
+- Piping output into a pager or `head` no longer ends in a `BrokenPipeError` traceback;
+  lintex exits quietly. Ctrl-C prints one line instead of a stack trace.
+- `lintex rules` and `lintex explain` accept `--color` / `--no-color` like the other commands.
+
 ## [0.1.0] - 2026-10-23
 
 First release.

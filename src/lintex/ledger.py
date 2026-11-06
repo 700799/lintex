@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from lintex.config import ConfigError, find_config_file
 from lintex.models import Severity, Violation
 
 LEDGER_ENV = "LINTEX_LEDGER_DIR"
@@ -40,6 +41,32 @@ def ledger_dir() -> Path:
     else:
         base = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache")
     return base / "lintex" / "ledgers"
+
+
+def project_root(start: Path | str | None = None) -> Path:
+    """The directory a project's ledger is keyed on, found from ``start`` (default: cwd).
+
+    One rule for everything that reads or writes the ledger (the hook, `report`, the
+    status line, `doctor`), so they always agree: the nearest directory with lintex
+    configuration, else the nearest enclosing git repository, else ``start`` itself.
+    ``start`` should be the session's working directory, never the edited file's own
+    directory: with no config file those differ, and the writer and its readers would
+    look in different places.
+    """
+    here = Path(start) if start is not None else Path.cwd()
+    here = here.resolve()
+    if here.is_file():
+        here = here.parent
+    try:
+        found = find_config_file(here)
+    except ConfigError:
+        found = None  # a broken config must not move the ledger
+    if found is not None:
+        return found[0].parent
+    for directory in (here, *here.parents):
+        if (directory / ".git").exists():
+            return directory
+    return here
 
 
 def ledger_path(root: Path) -> Path:

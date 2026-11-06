@@ -198,6 +198,7 @@ error when the minimum is 3.13 or later, and a warning ("still exists on your mi
 ```python
 value = eval(expr)  # lintex: ignore[LX203]
 value = eval(expr)  # lintex: ignore            (every rule on this line)
+# For a call spread over a few lines, put the comment on its first or last line.
 # lintex: skip-file                             (anywhere in the file, on its own line)
 ```
 
@@ -423,9 +424,9 @@ violations = lint_source(code, path="generated.py")
 for v in violations:
     print(v.code, v.line, v.message, v.fix)
 
-linter = Linter(load_config("."))       # reuse for many files
+linter = Linter(load_config("."))  # reuse for many files
 result = linter.lint_paths(["src"])
-result.to_dict()                        # same shape as --json
+result.to_dict()  # same shape as --json
 ```
 
 ## Development

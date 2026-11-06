@@ -7,6 +7,7 @@ edits are skipped (the second one would be reported again on the next run).
 
 from __future__ import annotations
 
+import ast
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -39,13 +40,21 @@ def apply_autofixes(source: str, fixes: Iterable[Autofix]) -> tuple[str, int, in
             skipped += 1  # overlaps an edit already made on this line
             continue
         text = lines[index]
-        if fix.end_col - 1 > len(text.rstrip("\r\n")):
-            skipped += 1
+        if text[fix.col - 1 : fix.end_col - 1] != fix.original:
+            skipped += 1  # the file is not what we linted, or the span was wrong
             continue
         lines[index] = text[: fix.col - 1] + fix.replacement + text[fix.end_col - 1 :]
         last_start[fix.line] = fix.col
         applied += 1
     return "".join(lines), applied, skipped
+
+
+def _parses(source: str) -> bool:
+    try:
+        ast.parse(source)
+    except (SyntaxError, ValueError, RecursionError):
+        return False
+    return True
 
 
 def fix_files(violations: Iterable[Violation], root: Path | None = None) -> FixReport:
@@ -61,6 +70,10 @@ def fix_files(violations: Iterable[Violation], root: Path | None = None) -> FixR
         source = raw.decode("utf-8-sig", errors="surrogateescape")
         new_source, applied, skipped = apply_autofixes(source, fixes)
         report.skipped += skipped
+        if applied and _parses(source) and not _parses(new_source):
+            # A last line of defence: a fix must never break a file that was valid.
+            report.skipped += applied
+            continue
         if applied:
             bom = b"\xef\xbb\xbf" if raw.startswith(b"\xef\xbb\xbf") else b""
             file.write_bytes(bom + new_source.encode("utf-8", errors="surrogateescape"))

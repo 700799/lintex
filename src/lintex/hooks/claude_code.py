@@ -69,7 +69,7 @@ def run_claude_code_hook(
     if config.ledger and linted:
         try:
             ledger.record(
-                config.root,
+                ledger.project_root(Path(cwd)),
                 session=str(payload.get("session_id") or ""),
                 tool=str(payload.get("tool_name") or ""),
                 files=linted,

@@ -23,10 +23,42 @@ _ELISION_SUBJECT = re.compile(
     re.IGNORECASE,
 )
 _ELISION_MARKER = re.compile(
-    r"\.\.\.|…|\bhere\b|\bunchanged\b|\bremains?\b|\bstays?\b|\bas (?:before|is)\b|\bomitted\b"
-    r"|\bgoes\b",
+    r"\.\.\.|\u2026|\bhere\b|\bunchanged\b|\bremains?\b|\bstays?\b|\bas (?:before|is)\b"
+    r"|\bomitted\b|\bgoes\b",
     re.IGNORECASE,
 )
+
+# Elisions with words between the adjective and the noun: "existing validation logic",
+# "rest of the request handling code", "other helper methods". The wider subject makes a
+# chance match likelier ("the existing user guide is described here"), so these need a
+# marker that only an elision uses, not a bare "here" or "remains".
+_WIDE_NOUNS = (
+    r"code|implementation|logic|methods?|functions?|imports?|tests?|classes|class|handlers?|"
+    r"validation|handling|checks?|processing|parsing|setup|config(?:uration)?|fields?|routes?|"
+    r"endpoints?|fixtures?|helpers?|decorators?|docstrings?|content|contents|sections?|"
+    r"blocks?|steps?|statements?|cases?|body|module|file"
+)
+_ELISION_SUBJECT_WIDE = re.compile(
+    r"\b(?:(?:rest|remainder) of (?:the |this |your )?"
+    r"|(?:existing|previous|original|other|remaining) )"
+    rf"(?:[\w'-]+ ){{0,3}}?(?:{_WIDE_NOUNS})\b",
+    re.IGNORECASE,
+)
+_ELISION_MARKER_STRONG = re.compile(
+    r"\.\.\.|\u2026|\bunchanged\b|\bremains? (?:the same|as is|as before|untouched)\b"
+    r"|\bstays? (?:the same|as is|as before)\b|\bas (?:before|is)\b|\bomitted\b|\belided\b"
+    r"|\bfor brevity\b|\bnot shown\b|\btruncated\b",
+    re.IGNORECASE,
+)
+
+
+def is_elision(text: str) -> bool:
+    """True if a comment stands in for code that is not there."""
+    if _ELISION_SUBJECT.search(text) and _ELISION_MARKER.search(text):
+        return True
+    return bool(_ELISION_SUBJECT_WIDE.search(text) and _ELISION_MARKER_STRONG.search(text))
+
+
 _STUB_PATTERNS = re.compile(
     r"(?:\b(?:your|actual|real) (?:code|logic|implementation) (?:goes )?here\b"
     r"|\b(?:code|logic|implementation) goes here\b"
@@ -50,6 +82,7 @@ def _comments(source: str) -> Iterator[tuple[int, int, str]]:
 def _might_match(text: str) -> bool:
     return bool(
         _ELISION_SUBJECT.search(text)
+        or _ELISION_SUBJECT_WIDE.search(text)
         or _STUB_PATTERNS.search(text)
         or _BARE_ELLIPSIS.match(text.lstrip("#"))
     )
@@ -81,7 +114,7 @@ class PlaceholderCodeRule(Rule):
         if not any("#" in line and _might_match(line[line.index("#") :]) for line in ctx.lines):
             return
         for line, col, text in _comments(ctx.source):
-            elided = _ELISION_SUBJECT.search(text) and _ELISION_MARKER.search(text)
+            elided = is_elision(text)
             if not elided and _BARE_ELLIPSIS.match(text):
                 # A lone `# ...` between code lines; inside a comment block it is prose.
                 elided = not _neighbour_is_comment(ctx, line)

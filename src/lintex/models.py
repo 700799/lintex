@@ -39,6 +39,10 @@ class Autofix:
     col: int
     end_col: int
     replacement: str
+    #: The text expected at the span. It is checked again right before writing, so a
+    #: span computed from a wrong node position (or a file edited since) is skipped
+    #: instead of overwriting the wrong characters.
+    original: str
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -46,6 +50,7 @@ class Autofix:
             "col": self.col,
             "end_col": self.end_col,
             "replacement": self.replacement,
+            "original": self.original,
         }
 
 

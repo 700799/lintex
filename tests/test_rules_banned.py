@@ -96,3 +96,20 @@ def test_project_banned_apis():
     assert [v.line for v in vs] == [3, 4, 5, 6]
     assert vs[0].fix == "Use app.http.client."
     assert "`print` is banned" in vs[2].message
+
+
+def test_select_list_heuristic():
+    from lintex.rules.banned_patterns import looks_like_sql
+
+    assert not looks_like_sql("Select a value from the menu")
+    assert not looks_like_sql("Select all the files from here")
+    assert looks_like_sql("SELECT id, name FROM users")
+    assert looks_like_sql("select * from t")
+    assert looks_like_sql("SELECT DISTINCT name FROM t")
+
+
+def test_sql_after_leading_comment_is_detected():
+    from lintex.rules.banned_patterns import looks_like_sql
+
+    assert looks_like_sql("-- fetch users\nSELECT * FROM users WHERE id = ")
+    assert looks_like_sql("/* x */ SELECT id FROM users")

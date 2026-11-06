@@ -95,3 +95,25 @@ def test_lint_paths_respects_excludes_and_reports_json(tmp_path):
 def test_missing_file_is_reported_not_raised(tmp_path):
     result = Linter(Config(root=tmp_path)).lint_paths([tmp_path / "nope.py"])
     assert result.violations[0].rule == "io-error"
+
+
+def test_suppression_on_last_line_of_short_multiline_statement():
+    from conftest import codes
+
+    src = "import subprocess\nsubprocess.run(\n    cmd,\n    shell=True,\n)  # lintex: ignore\n"
+    assert codes(src) == []
+    assert codes(src.replace("  # lintex: ignore", "")) != []
+
+
+def test_explicit_non_python_files_are_skipped(tmp_path):
+    from lintex.engine import Linter
+
+    (tmp_path / "README.md").write_text("# hi\n\nnot python (\n")
+    (tmp_path / "a.py").write_text("x = 1\n")
+    (tmp_path / "tool").write_text("#!/usr/bin/env python3\nx = 1\n")
+    files = {
+        p.name
+        for p in Linter().iter_files([tmp_path / "README.md", tmp_path / "a.py", tmp_path / "tool"])
+    }
+    assert files == {"a.py", "tool"}
+    assert Linter().lint_paths([tmp_path / "README.md"]).violations == []

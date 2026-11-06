@@ -457,7 +457,7 @@ def _cmd_explain(args: argparse.Namespace) -> int:
 
 
 def _cmd_report(args: argparse.Namespace) -> int:
-    root = load_config(args.paths).root
+    root = ledger.project_root(args.paths)
     style = Style.detect(sys.stdout, color=args.color)
     if args.clear:
         removed = ledger.clear(root)

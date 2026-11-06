@@ -161,9 +161,10 @@ def check_git_hook(project: Path) -> Check:
     return Check("git hook", WARN, "not installed", "Run `lintex install-hook git`.")
 
 
-def check_ledger(config: Config | None, project: Path) -> Check:
+def check_ledger(config: Config | None, start: Path) -> Check:
     if config is not None and not config.ledger:
         return Check("ledger", OK, "disabled by config (`ledger = false`)")
+    project = ledger.project_root(start)
     path = ledger.ledger_path(project)
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -196,7 +197,7 @@ def run_checks(start: Path | None = None) -> list[Check]:
         check_claude_hook(project),
         check_statusline(project),
         check_git_hook(project),
-        check_ledger(config, project),
+        check_ledger(config, start),
     ]
 
 

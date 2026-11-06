@@ -19,9 +19,9 @@ def test_py2_builtins_are_flagged_with_rewrites():
         ("LX101", 2, 12),
         ("LX101", 2, 20),
     ]
-    assert vs[0].autofix == Autofix(1, 10, 16, "range")
-    assert vs[1].autofix == Autofix(2, 12, 19, "str")
-    assert vs[2].autofix == Autofix(2, 20, 29, "input")
+    assert vs[0].autofix == Autofix(1, 10, 16, "range", "xrange")
+    assert vs[1].autofix == Autofix(2, 12, 19, "str", "unicode")
+    assert vs[2].autofix == Autofix(2, 20, 29, "input", "raw_input")
     assert all(v.severity is Severity.ERROR for v in vs)
     [v] = lint("total = reduce(lambda a, b: a + b, [1, 2])\n")
     assert v.autofix is None and "functools.reduce" in v.fix

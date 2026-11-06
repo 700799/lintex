@@ -197,3 +197,32 @@ def test_parse_since():
     assert ledger.parse_since("7d") == timedelta(days=7)
     with pytest.raises(ValueError):
         ledger.parse_since("tomorrow")
+
+
+def test_hook_and_report_agree_without_a_config_file(tmp_path, monkeypatch, capsys):
+    """No config anywhere: the hook (editing a file in a subdir) and `report` share a ledger."""
+    proj = tmp_path / "proj"
+    (proj / "pkg").mkdir(parents=True)
+    (proj / ".git").mkdir()
+    (proj / "pkg" / "bad.py").write_text("import pickle\nx = pickle.loads(b'')\n")
+    monkeypatch.chdir(proj)
+    assert _hook(proj, "pkg/bad.py") == 2
+    assert ledger.project_root(proj) == proj.resolve()
+    assert ledger.project_root(proj / "pkg") == proj.resolve()
+    assert ledger.project_root(proj / "pkg" / "bad.py") == proj.resolve()
+    assert main(["report"]) == 0
+    assert "pickle" in capsys.readouterr().out.lower() or ledger.load(proj)
+    assert ledger.load(ledger.project_root(proj))
+
+
+def test_project_root_without_config_or_git_is_start(tmp_path):
+    (tmp_path / "a").mkdir()
+    assert ledger.project_root(tmp_path / "a") == (tmp_path / "a").resolve()
+
+
+def test_project_root_prefers_config_over_git(tmp_path):
+    (tmp_path / ".git").mkdir()
+    sub = tmp_path / "svc" / "src"
+    sub.mkdir(parents=True)
+    (tmp_path / "svc" / ".lintex.toml").write_text("")
+    assert ledger.project_root(sub) == (tmp_path / "svc").resolve()

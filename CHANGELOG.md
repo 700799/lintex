@@ -9,6 +9,24 @@ severities may change between minor versions as they are tuned on real codebases
 
 ## [0.2.0] - 2026-11-05
 
+### Fixed
+
+- LX401 now catches elision comments such as `# ... existing validation logic unchanged.`
+  (a wider set of nouns, paired with an explicit "unchanged / omitted / ..." marker so ordinary
+  comments are not flagged).
+- The Claude Code hook, `lintex report`, `lintex statusline` and `lintex doctor` now agree on where
+  the session ledger lives when there is no config file (config dir, else enclosing git repo, else
+  the working directory). Previously the hook keyed it on the edited file's own directory.
+- `check --fix` could overwrite the wrong characters on Python 3.9-3.11, where `ast` reports wrong
+  columns for names inside multi-line f-strings. Every autofix now carries the text it expects at
+  its span and is skipped if it differs, and a fix that would make a valid file unparseable is
+  never written.
+- Explicitly named non-Python files (`lintex check README.md`, shell globs) are skipped instead of
+  being reported as syntax errors.
+- LX201 no longer flags English prose such as `f"Select a value from {menu}"`, and now detects SQL
+  that starts with a `--` or `/* */` comment.
+- `# lintex: ignore` on the last line of a short multi-line statement now suppresses it.
+
 ### Added
 
 - LX101 now flags Python 2 builtins used as bare names (`xrange`, `unicode`, `raw_input`,

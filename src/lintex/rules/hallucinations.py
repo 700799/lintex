@@ -91,9 +91,7 @@ class KnownBadApiRule(Rule):
                     severity=entry.severity(target),
                 )
                 if entry.rewrite and v.end_col is not None:
-                    v = dataclasses.replace(
-                        v, autofix=Autofix(v.line, v.col, v.end_col, entry.rewrite)
-                    )
+                    v = _fix(v, v.col, v.end_col, entry.rewrite, lambda t, n=node.id: t == n)
                 yield v
         elif isinstance(node, (ast.Import, ast.ImportFrom)):
             seen: set[str] = set()
@@ -161,16 +159,25 @@ def _split(dotted: str) -> tuple[str, str]:
     return head, last
 
 
+def _fix(v: Violation, col: int, end_col: int, replacement: str, valid) -> Violation:
+    """Attach an autofix, but only if the source text at the span is what we mean to rewrite.
+
+    Node positions are not always trustworthy: before Python 3.12 they are wrong for names
+    inside multi-line f-strings, and a rewrite that lands on the wrong characters would
+    corrupt the file. ``valid`` receives the text found at the span; when it says no, the
+    finding is still reported, just not offered as fixable.
+    """
+    original = v.snippet[col - 1 : end_col - 1]
+    if end_col <= col or not original or not valid(original):
+        return v
+    return dataclasses.replace(v, autofix=Autofix(v.line, col, end_col, replacement, original))
+
+
 def _with_attr_rename(v: Violation, attr: str, replacement: str) -> Violation:
     """Rewrite just the attribute name at the end of the span (``x.iteritems`` -> ``x.items``)."""
     if v.end_col is None:
         return v
-    start = v.end_col - len(attr)
-    if start < v.col:
-        return v
-    return dataclasses.replace(
-        v, autofix=Autofix(line=v.line, col=start, end_col=v.end_col, replacement=replacement)
-    )
+    return _fix(v, v.end_col - len(attr), v.end_col, replacement, lambda t: t == attr)
 
 
 def _autofix_for(v: Violation, node: ast.AST, name: str, rewrite: str) -> Violation:
@@ -187,8 +194,8 @@ def _autofix_for(v: Violation, node: ast.AST, name: str, rewrite: str) -> Violat
         if new_head == old_head:
             return _with_attr_rename(v, old_last, new_last)
         if not new_head:  # a builtin replaces the whole `mod.name` chain
-            return dataclasses.replace(
-                v, autofix=Autofix(line=v.line, col=v.col, end_col=v.end_col, replacement=rewrite)
+            return _fix(
+                v, v.col, v.end_col, rewrite, lambda t: "." in t and t.rstrip().endswith(old_last)
             )
         return v
     if isinstance(node, ast.ImportFrom) and len(node.names) == 1 and new_head:
@@ -198,9 +205,7 @@ def _autofix_for(v: Violation, node: ast.AST, name: str, rewrite: str) -> Violat
         text = f"from {new_head} import {new_last}" + (
             f" as {alias.asname}" if alias.asname else ""
         )
-        return dataclasses.replace(
-            v, autofix=Autofix(line=v.line, col=v.col, end_col=v.end_col, replacement=text)
-        )
+        return _fix(v, v.col, v.end_col, text, lambda t: t.startswith("from ") and alias.name in t)
     return v
 
 

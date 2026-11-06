@@ -76,13 +76,23 @@ def _suppressions(lines: list[str]) -> dict[int, set[str] | None]:
     return result
 
 
+#: Longest span (in lines) whose closing line may carry the suppression comment. A call
+#: or statement spread over a few lines is written `foo(\n    ...\n)  # lintex: ignore`;
+#: a whole function (LX301) is not, or any comment inside it would silence it.
+_SUPPRESS_SPAN = 8
+
+
 def _is_suppressed(v: Violation, suppressed: dict[int, set[str] | None]) -> bool:
-    if v.line not in suppressed:
-        return False
-    codes = suppressed[v.line]
-    if codes is None:
-        return True
-    return any(v.code.startswith(c) or v.rule.upper() == c for c in codes)
+    lines = [v.line]
+    if v.end_line and 0 < v.end_line - v.line <= _SUPPRESS_SPAN:
+        lines.append(v.end_line)
+    for line in lines:
+        if line not in suppressed:
+            continue
+        codes = suppressed[line]
+        if codes is None or any(v.code.startswith(c) or v.rule.upper() == c for c in codes):
+            return True
+    return False
 
 
 class Linter:
@@ -142,6 +152,8 @@ class Linter:
             path = Path(raw)
             candidates = self._walk(path) if path.is_dir() else [path]
             for candidate in candidates:
+                if not _lintable(candidate):
+                    continue
                 if candidate not in seen and not self.config.is_excluded(candidate):
                     seen.add(candidate)
                     yield candidate
@@ -265,6 +277,25 @@ class Linter:
             out.append(v)
         out.sort(key=lambda v: (v.line, v.col, v.code))
         return out
+
+
+def _lintable(path: Path) -> bool:
+    """Whether an explicitly named path should be parsed as Python.
+
+    Directory walks only ever yield ``.py`` files, but a path named on the command line
+    (often from a shell glob like ``lintex check *``) can be anything: a README, JSON,
+    an image. Those are skipped rather than reported as syntax errors. A missing path is
+    let through so the read error is reported, and so are extensionless scripts with a
+    Python shebang.
+    """
+    if path.suffix in (".py", ".pyi") or not path.exists():
+        return True
+    try:
+        with path.open("rb") as fh:
+            first = fh.readline(200)
+    except OSError:
+        return True
+    return first.startswith(b"#!") and b"python" in first
 
 
 def _display(path: Path) -> str:

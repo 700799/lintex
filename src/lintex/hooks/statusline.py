@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import IO, Any
 
 from lintex import ledger
-from lintex.config import ConfigError, load_config
+from lintex.config import ConfigError
 from lintex.reporters import Style
 
 STATUSLINE_COMMAND = "lintex statusline"
@@ -39,10 +39,7 @@ def read_payload(stdin: IO[str]) -> dict[str, Any]:
 def _root(payload: dict[str, Any]) -> Path:
     workspace = payload.get("workspace") or {}
     start = workspace.get("project_dir") or workspace.get("current_dir") or payload.get("cwd")
-    try:
-        return load_config(start).root
-    except ConfigError:
-        return Path(start or ".").resolve()
+    return ledger.project_root(start)
 
 
 def render_segment(summary: ledger.Summary, style: Style) -> str:

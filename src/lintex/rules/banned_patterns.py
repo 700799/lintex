@@ -16,9 +16,12 @@ from typing import Any
 from lintex.models import Severity, Violation
 from lintex.rules.base import FileContext, Rule, call_kwarg, is_const_false, is_const_true
 
+# SQL may open with comments (`-- fetch users`, `/* ... */`) before the statement.
+_LEAD = r"^(?:\s|\(|--[^\n]*(?:\n|$)|/\*.*?\*/)*"
 _SQL_RE = re.compile(
-    r"""^[\s(]*(?:
-        select\s.+?\sfrom\s
+    _LEAD
+    + r"""(?:
+        select\s+(?P<cols>.+?)\s+from\s
       | insert\s+(?:or\s+\w+\s+)?into\s
       | update\s+[\w."`\[\]]+\s+set\s
       | delete\s+from\s
@@ -30,14 +33,33 @@ _SQL_RE = re.compile(
     )""",
     re.IGNORECASE | re.DOTALL | re.VERBOSE,
 )
+_SELECT_PREFIX = re.compile(r"^(?:distinct|all)\s+|^top\s+\d+\s+", re.IGNORECASE)
 _PLACEHOLDER = "?"
 # Interpolating a pre-built list of bind placeholders ("?, ?, ?") is the
 # standard way to parameterise IN (...) clauses, so don't flag it.
 _SAFE_INTERPOLATION_RE = re.compile(r"placeholder|qmarks|bind|marks", re.IGNORECASE)
 
 
+def _select_list_ok(cols: str) -> bool:
+    """Is the text between SELECT and FROM a column list, or an English sentence?
+
+    ``Select a value from {menu}`` matches the SQL shape but is prose. A column list is a
+    single name, a comma-separated list, ``*``, a call, a qualified or quoted name, or
+    ``expr AS alias``; two bare words ("a value") are not.
+    """
+    cols = _SELECT_PREFIX.sub("", cols.strip())
+    if re.search(r"[*,(.\"`\[]", cols):
+        return True
+    words = cols.split()
+    return len(words) <= 1 or (len(words) == 3 and words[1].lower() == "as")
+
+
 def looks_like_sql(text: str) -> bool:
-    return bool(_SQL_RE.search(text))
+    match = _SQL_RE.search(text)
+    if match is None:
+        return False
+    cols = match.group("cols")
+    return cols is None or _select_list_ok(cols)
 
 
 def _template_text(node: ast.AST) -> tuple[str, list[ast.expr]] | None:

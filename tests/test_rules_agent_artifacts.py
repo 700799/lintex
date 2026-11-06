@@ -57,3 +57,35 @@ def test_swallowed_and_bare_except():
                 pass
     """
     assert [(v.code, v.line) for v in lint(src)] == [("LX402", 5), ("LX403", 9), ("LX402", 17)]
+
+
+import pytest as _pytest  # noqa: E402
+from conftest import codes as _codes  # noqa: E402
+
+
+@_pytest.mark.parametrize(
+    "comment",
+    [
+        "# ... existing validation logic unchanged.",
+        "# ... rest of the function remains the same",
+        "# ... existing handlers ...",
+        "# (previous imports omitted for brevity)",
+        "# ... other methods unchanged",
+        "# rest of the implementation as before",
+    ],
+)
+def test_lx401_catches_elision_phrasings(comment):
+    assert "LX401" in _codes(f"def f():\n    {comment}\n    return 1\n")
+
+
+@_pytest.mark.parametrize(
+    "comment",
+    [
+        "# Validate the existing user before creating a new one",
+        "# the rest of the team uses this value",
+        "# the previous step set this flag",
+        "# other cases are handled by the caller",
+    ],
+)
+def test_lx401_ignores_ordinary_comments(comment):
+    assert "LX401" not in _codes(f"def f():\n    {comment}\n    return 1\n")

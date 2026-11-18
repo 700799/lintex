@@ -9,7 +9,28 @@ severities may change between minor versions as they are tuned on real codebases
 
 ## [0.2.0] - 2026-11-05
 
+### Added
+
+- LX101 is aware of third-party versions. A removed or deprecated library API is not reported
+  when the project is pinned below the version that removed it (`pydantic==1.10` with
+  `pydantic.BaseSettings`). Versions come from `package-versions` in the config, lockfiles
+  (`uv.lock`, `poetry.lock`, `pdm.lock`, `Pipfile.lock`), `requirements*.txt` pins and upper
+  bounds in `pyproject.toml`.
+- `lintex report` shows each rule's fix rate and points out rules that are caught often but
+  rarely fixed, with how to downgrade them. `--json` gains `fix_rate` and `noisy` per rule.
+- `scripts/corpus_check.py` and a CI job that lint pinned releases of ten popular packages and
+  fail when any rule's count rises above the recorded baseline.
+
 ### Fixed
+
+- `# lintex: ignore` and `# lintex: skip-file` are only honoured in real comments, not inside
+  string literals or docstrings.
+- A Python 2 name bound by a relative or star import (`from .compat import basestring`,
+  `from . import apply`) is no longer reported by LX101. Found by the corpus check in requests
+  and SQLAlchemy.
+- LX102 no longer reports Windows- and macOS-only stdlib names (`ctypes.windll`,
+  `subprocess.STARTUPINFO`, `signal.CTRL_C_EVENT`, ...) when lintex runs on Linux.
+- An empty `lintex report` names the directory it looked up and says how to point it elsewhere.
 
 - LX401 now catches elision comments such as `# ... existing validation logic unchanged.`
   (a wider set of nouns, paired with an explicit "unchanged / omitted / ..." marker so ordinary

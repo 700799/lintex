@@ -113,3 +113,24 @@ def test_unresolvable_import_opt_in(tmp_path, monkeypatch):
         "rules": {"unresolvable-import": {"known-modules": ["fastjsonx_not_real"]}},
     }
     assert lint(src, path=str(tmp_path / "x.py"), **known) == []
+
+
+def test_relative_imports_shadow_py2_builtins_and_stdlib_names():
+    from conftest import codes
+
+    # requests: `from .compat import basestring`; sqlalchemy: `from . import apply`.
+    assert codes("from .compat import basestring\nx = isinstance(1, basestring)\n") == []
+    assert codes("from . import apply\napply.run(1)\n") == []
+    assert codes("from .compat import *\nx = isinstance(1, basestring)\n") == []
+    assert codes("from six.moves import *\nfor i in xrange(3):\n    pass\n") == []
+    # Without any of that, the bare name is still a Python 2 leftover.
+    assert codes("x = isinstance(1, basestring)\n") == ["LX101"]
+
+
+@requires_stdlib_names
+def test_other_platform_names_are_not_inventions():
+    from conftest import codes
+
+    src = "from ctypes import windll, WINFUNCTYPE\nimport subprocess\nsubprocess.STARTUPINFO()\n"
+    assert codes(src) == []
+    assert codes("from ctypes import windlls\n") == ["LX102"]

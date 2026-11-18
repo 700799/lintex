@@ -36,6 +36,8 @@ class FileContext:
     # (assignment, parameter, def, class, except-as). Resolution treats them
     # as shadowed: `def f(object): object.x` is not about builtins.object.
     rebound: set[str] = field(default_factory=set)
+    # True when the file has a `from x import *`: any bare name may come from it
+    star_import: bool = False
     # names of functions/methods defined in this file
     defined_functions: set[str] = field(default_factory=set)
     # scratch space for rules that need per-file state, keyed by rule code

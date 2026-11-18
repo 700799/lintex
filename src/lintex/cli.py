@@ -484,8 +484,9 @@ def _cmd_report(args: argparse.Namespace) -> int:
     if summary.runs == 0:
         print(
             dim_note(
-                "Nothing recorded yet. The ledger fills as the Claude Code hook checks edits "
-                "(`lintex install-hook claude-code`).",
+                f"Nothing recorded for {root}. The ledger fills as the Claude Code hook checks "
+                "edits (`lintex install-hook claude-code`). If the agent worked in a different "
+                "directory, run `lintex report` from there or pass it as a path.",
                 style,
             )
         )
@@ -493,19 +494,7 @@ def _cmd_report(args: argparse.Namespace) -> int:
     print(render_segment(summary, style))
     print(_report_headline(summary, style))
     if summary.by_code:
-        print()
-        width = max(len(s.rule) for s in summary.by_code.values())
-        ranked = sorted(summary.by_code.items(), key=lambda kv: -(kv[1].caught + kv[1].open))
-        for code, stats in ranked:
-            state = (
-                style.paint("all fixed", "green")
-                if stats.open == 0
-                else style.paint(f"{stats.open} open", "red" if stats.open else "dim")
-            )
-            print(
-                f"  {style.paint(code, 'cyan')} {stats.rule.ljust(width)}  "
-                f"caught {stats.caught:>3}  fixed {stats.fixed:>3}  {state}"
-            )
+        _print_rule_table(summary, style)
     if summary.open_findings:
         print()
         print(style.paint("Still open", "bold"))
@@ -520,6 +509,36 @@ def _cmd_report(args: argparse.Namespace) -> int:
         if len(summary.open_findings) > 20:
             print(style.paint(f"  … and {len(summary.open_findings) - 20} more", "dim"))
     return EXIT_OK
+
+
+def _print_rule_table(summary: ledger.Summary, style: Style) -> None:
+    """One line per rule: caught, fixed, fix rate, and a note on rules nobody acts on."""
+    print()
+    width = max(len(s.rule) for s in summary.by_code.values())
+    ranked = sorted(summary.by_code.items(), key=lambda kv: -(kv[1].caught + kv[1].open))
+    for code, stats in ranked:
+        state = (
+            style.paint("all fixed", "green")
+            if stats.open == 0
+            else style.paint(f"{stats.open} open", "red" if stats.open else "dim")
+        )
+        rate = "" if stats.fix_rate is None else f"{stats.fix_rate:>4.0%}"
+        print(
+            f"  {style.paint(code, 'cyan')} {stats.rule.ljust(width)}  "
+            f"caught {stats.caught:>3}  fixed {stats.fixed:>3} {rate:>4}  {state}"
+        )
+    noisy = [code for code, stats in ranked if stats.noisy]
+    if noisy:
+        print()
+        print(
+            dim_note(
+                f"Rarely acted on: {', '.join(noisy)} (caught "
+                f"{ledger.NOISY_MIN_CAUGHT}+ times, under "
+                f"{ledger.NOISY_MAX_FIX_RATE:.0%} fixed). If these are not useful here, "
+                "downgrade them under `[tool.lintex.severity]` or add them to `ignore`.",
+                style,
+            )
+        )
 
 
 def _report_headline(summary: ledger.Summary, style: Style) -> str:

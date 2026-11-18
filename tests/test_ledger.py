@@ -159,7 +159,10 @@ def test_ledger_can_be_disabled(project):
 
 def test_report_command(project, capsys):
     assert main(["report", "--no-color"]) == 0
-    assert "Nothing recorded yet" in capsys.readouterr().out
+    out = capsys.readouterr().out.replace("\n", " ")
+    assert "Nothing recorded for" in out and "run `lintex report` from there" in " ".join(
+        out.split()
+    )
     (project / "bad.py").write_text("eval('1')\nexec('2')\n")
     _hook(project, "bad.py")
     (project / "bad.py").write_text("exec('2')\n")
@@ -174,6 +177,7 @@ def test_report_command(project, capsys):
     assert main(["report", "--json", "--session", "s1"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["caught"] == 2 and data["fixed"] == 1 and data["open"] == 1
+    assert data["by_code"]["LX203"]["fix_rate"] == 0.5 and not data["by_code"]["LX203"]["noisy"]
     assert main(["report", "--since", "soon"]) == 2
     assert main(["report", "--clear"]) == 0
     assert main(["report", "--json", "--all"]) == 0
@@ -226,3 +230,23 @@ def test_project_root_prefers_config_over_git(tmp_path):
     sub.mkdir(parents=True)
     (tmp_path / "svc" / ".lintex.toml").write_text("")
     assert ledger.project_root(sub) == (tmp_path / "svc").resolve()
+
+
+def test_report_points_out_rules_nobody_acts_on(project, capsys):
+    # Six dangerous calls caught, none ever fixed across later edits: a noisy rule here.
+    (project / "bad.py").write_text("".join(f"eval('{i}')\n" for i in range(6)))
+    _hook(project, "bad.py")
+    _hook(project, "bad.py")
+    summary = ledger.summarize(ledger.load(project))
+    stats = summary.by_code["LX203"]
+    assert (stats.caught, stats.fixed, stats.fix_rate, stats.noisy) == (6, 0, 0.0, True)
+    assert main(["report", "--no-color"]) == 0
+    out = " ".join(capsys.readouterr().out.split())
+    assert "Rarely acted on: LX203" in out and "[tool.lintex.severity]" in out
+
+    # Once most are fixed the rule is doing its job and the note goes away.
+    (project / "bad.py").write_text("eval('0')\n")
+    _hook(project, "bad.py")
+    assert not ledger.summarize(ledger.load(project)).by_code["LX203"].noisy
+    assert main(["report", "--no-color"]) == 0
+    assert "Rarely acted on" not in capsys.readouterr().out

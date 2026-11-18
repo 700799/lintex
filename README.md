@@ -193,6 +193,19 @@ Removals are judged against the project's minimum Python: lintex reads `requires
 error when the minimum is 3.13 or later, and a warning ("still exists on your minimum, breaks on
 3.13+") before that. Without either, the interpreter running lintex is the target.
 
+Third-party removals are judged against the version the project is pinned to.
+`from pydantic import BaseSettings` is wrong on pydantic 2 and correct on 1.10, so when the
+project cannot be on the removing version, lintex says nothing. It reads, in this order:
+
+1. `package-versions` under `[tool.lintex]`, if you want to state it yourself;
+2. lockfiles and pins: `uv.lock`, `poetry.lock`, `pdm.lock`, `Pipfile.lock`, and `==` pins in
+   `requirements*.txt` / `constraints*.txt`;
+3. upper bounds in `pyproject.toml` dependencies (`pydantic<2`, `openai~=0.28`, poetry's `^1.10`).
+
+A lower bound alone (`pydantic>=1.10`) changes nothing, because a fresh install would resolve to
+the latest release. The environment lintex itself runs in is never consulted: lintex is often
+installed apart from the project (pipx, uvx, pre-commit).
+
 ### Suppressing
 
 ```python
@@ -201,6 +214,9 @@ value = eval(expr)  # lintex: ignore            (every rule on this line)
 # For a call spread over a few lines, put the comment on its first or last line.
 # lintex: skip-file                             (anywhere in the file, on its own line)
 ```
+
+Only real comments count. The same text inside a string or docstring (documentation, a test
+fixture, a prompt) is data and suppresses nothing.
 
 ## Configuration
 
@@ -216,6 +232,7 @@ enable = ["LX103", "raw-sql"]                     # turn on opt-in rules
 fail-on = "error"                                 # or "warning"
 severity = { LX301 = "error" }                    # change a rule's severity
 per-file-ignores = { "tests/**" = ["LX203", "LX301"] }
+package-versions = { pydantic = "1.10", openai = "<1" }   # overrides lockfiles and pins
 
 [tool.lintex.rules.function-too-long]
 max-lines = 40
@@ -312,14 +329,21 @@ lintex ledger · myapp · last 24h
 lintex ▮▮▮▮▮▮▮▮▮▮ ✖ 1 ▲ 2 · 9 fixed
 12 caught across 14 edits of 5 files · 9 fixed by the agent · 3 still open
 
-  LX201 sql-string-interpolation  caught   4  fixed   4  all fixed
-  LX402 swallowed-exception       caught   3  fixed   2  1 open
-  LX301 function-too-long         caught   2  fixed   0  2 open
+  LX201 sql-string-interpolation  caught   4  fixed   4 100%  all fixed
+  LX402 swallowed-exception       caught   3  fixed   2  67%  1 open
+  LX301 function-too-long         caught   6  fixed   1  17%  5 open
   ...
+
+  Rarely acted on: LX301 (caught 5+ times, under 30% fixed). If these are not useful here,
+  downgrade them under `[tool.lintex.severity]` or add them to `ignore`.
 
 Still open
   ✖ app/db.py:41  LX402 Exception handler catches Exception and silently discards it.
 ```
+
+The percentage is the share of a rule's catches that later went away. A rule caught often and
+fixed rarely is noise in this project: the agent is being interrupted for something nobody acts
+on. One caveat: a finding silenced with `# lintex: ignore` also counts as gone.
 
 `--since 7d`, `--all`, `--session ID`, `--json` and `--clear` are available. Set `ledger = false`
 under `[tool.lintex]` to turn recording off, or point `LINTEX_LEDGER_DIR` somewhere else.
@@ -436,7 +460,14 @@ uv venv && uv pip install -e . pytest pyyaml ruff
 pytest
 ruff check src tests && ruff format --check src tests
 lintex check .                          # lintex lints itself
+python scripts/corpus_check.py          # false-positive check on real-world code
 ```
+
+`corpus_check.py` lints pinned releases of ten widely used packages (requests, Flask, click,
+SQLAlchemy, rich, ...) and compares the per-rule counts with `tests/corpus/baseline.json`. That
+code never changes, so a count that goes up means a rule started flagging real-world code it
+used to accept. CI runs it on every pull request. `--show LX201` prints the findings behind a
+number; `--update` accepts the current counts after you have looked at them.
 
 A new rule subclasses `lintex.rules.base.Rule`. It sets `code`, `name`, `summary`, and
 `node_types`, implements `check_node` and/or `check_file`, and is added to `ALL_RULES` in

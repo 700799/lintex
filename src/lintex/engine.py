@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import ast
+import io
 import os
 import re
 import time
+import tokenize
 from collections import defaultdict
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field, replace
@@ -20,9 +22,7 @@ from lintex.rules.base import FileContext, Rule
 AST = ast.AST
 
 _SUPPRESS_RE = re.compile(r"#\s*lintex:\s*ignore(?:\[([^\]]*)\])?", re.IGNORECASE)
-_SKIP_FILE_RE = re.compile(
-    r"^\s*#\s*lintex:\s*(?:skip|ignore)-file\b", re.IGNORECASE | re.MULTILINE
-)
+_SKIP_FILE_RE = re.compile(r"#\s*lintex:\s*(?:skip|ignore)-file\b", re.IGNORECASE)
 
 
 @dataclass
@@ -59,14 +59,40 @@ class LintResult:
         }
 
 
-def _suppressions(lines: list[str]) -> dict[int, set[str] | None]:
+def _directive_comments(source: str, lines: list[str]) -> list[tuple[int, str, bool]]:
+    """Real comments that mention lintex: ``(line, text, alone_on_its_line)``.
+
+    The file is tokenised so that `# lintex: ignore` inside a string literal or docstring
+    (documentation, a test fixture, a prompt) is not mistaken for a directive. Only files
+    that mention "lintex" at all pay for it. A file that cannot be tokenised is about to
+    be reported as a syntax error anyway; there the raw lines are the best available.
+    """
+    if "lintex" not in source:
+        return []
+    found: list[tuple[int, str, bool]] = []
+    try:
+        for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+            if tok.type == tokenize.COMMENT and "lintex" in tok.string:
+                found.append((tok.start[0], tok.string, not tok.line[: tok.start[1]].strip()))
+    except (tokenize.TokenError, IndentationError, SyntaxError):
+        found = []
+        for lineno, text in enumerate(lines, start=1):
+            if "lintex" in text and "#" in text:
+                head, _, tail = text.partition("#")
+                found.append((lineno, "#" + tail, not head.strip()))
+    return found
+
+
+def _skips_file(comments: list[tuple[int, str, bool]]) -> bool:
+    return any(alone and _SKIP_FILE_RE.match(text) for _, text, alone in comments)
+
+
+def _suppressions(comments: list[tuple[int, str, bool]]) -> dict[int, set[str] | None]:
     """Map line number -> suppressed codes/names (None means all)."""
     result: dict[int, set[str] | None] = {}
-    for lineno, text in enumerate(lines, start=1):
-        if "lintex" not in text:
-            continue
+    for lineno, text, _ in comments:
         match = _SUPPRESS_RE.search(text)
-        if match:
+        if match and not _SKIP_FILE_RE.match(text):
             codes = match.group(1)
             result[lineno] = (
                 None
@@ -115,13 +141,14 @@ class Linter:
     # -- single file ------------------------------------------------------
 
     def lint_source(self, source: str, path: str = "<string>") -> list[Violation]:
-        if _SKIP_FILE_RE.search(source):
-            return []
         lines = source.splitlines()
+        comments = _directive_comments(source, lines)
+        if _skips_file(comments):
+            return []
         try:
             tree = ast.parse(source, filename=path)
         except (SyntaxError, ValueError) as exc:
-            return self._syntax_error(exc, path, lines)
+            return self._syntax_error(exc, path, lines, comments)
 
         ctx = FileContext(path=path, source=source, tree=tree, config=self.config, lines=lines)
         nodes = self._index(tree, ctx)
@@ -135,7 +162,7 @@ class Linter:
                     violations.extend(rule.check_node(node, ctx))
         for rule in self._file_rules:
             violations.extend(rule.check_file(ctx))
-        return self._finalize(violations, path, lines)
+        return self._finalize(violations, path, comments)
 
     def lint_file(
         self, path: str | os.PathLike[str], display_path: str | None = None
@@ -215,6 +242,17 @@ class Linter:
                 for alias in node.names:
                     if alias.name != "*":
                         imports[alias.asname or alias.name] = f"{node.module}.{alias.name}"
+                    else:
+                        ctx.star_import = True
+            elif isinstance(node, ast.ImportFrom):
+                # Relative imports (`from .compat import basestring`, `from . import apply`)
+                # bind project-local names: whatever they are called, they are not the
+                # builtin or stdlib module of the same name.
+                for alias in node.names:
+                    if alias.name == "*":
+                        ctx.star_import = True
+                    else:
+                        rebound.add(alias.asname or alias.name)
             # Inlined ast.iter_child_nodes: this loop is the engine's hot path.
             for name in node._fields:
                 value = getattr(node, name, None)
@@ -228,7 +266,9 @@ class Linter:
                     stack.append(value)
         return nodes
 
-    def _syntax_error(self, exc: Exception, path: str, lines: list[str]) -> list[Violation]:
+    def _syntax_error(
+        self, exc: Exception, path: str, lines: list[str], comments: list
+    ) -> list[Violation]:
         if not self._report_syntax:
             return []
         lineno = getattr(exc, "lineno", None) or 1
@@ -252,14 +292,14 @@ class Linter:
             "indentation, a missing colon, or a partially applied edit).",
             snippet=snippet,
         )
-        return self._finalize([violation], path, lines)
+        return self._finalize([violation], path, comments)
 
     def _finalize(
-        self, violations: list[Violation], path: str, lines: list[str]
+        self, violations: list[Violation], path: str, comments: list[tuple[int, str, bool]]
     ) -> list[Violation]:
         if not violations:
             return violations
-        suppressed = _suppressions(lines)
+        suppressed = _suppressions(comments)
         file_ignores = self.config.ignored_codes_for(path) if path != "<string>" else []
         overrides = self.config.severity
         out = []

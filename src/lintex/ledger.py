@@ -193,12 +193,29 @@ def clear(root: Path) -> bool:
 # -- analysis --------------------------------------------------------------------
 
 
+#: A rule needs this many catches before its fix rate says anything.
+NOISY_MIN_CAUGHT = 5
+#: Below this share of catches fixed, a rule is being ignored more than acted on.
+NOISY_MAX_FIX_RATE = 0.3
+
+
 @dataclass
 class CodeStats:
     rule: str
     caught: int = 0
     fixed: int = 0
     open: int = 0
+
+    @property
+    def fix_rate(self) -> float | None:
+        """Share of catches the agent went on to fix; None before anything was caught."""
+        return min(1.0, self.fixed / self.caught) if self.caught else None
+
+    @property
+    def noisy(self) -> bool:
+        """Caught often, fixed rarely: the agent (or its user) is not acting on this rule."""
+        rate = self.fix_rate
+        return self.caught >= NOISY_MIN_CAUGHT and rate is not None and rate < NOISY_MAX_FIX_RATE
 
 
 @dataclass
@@ -240,7 +257,14 @@ class Summary:
             "first_ts": self.first_ts.isoformat() if self.first_ts else None,
             "last_ts": self.last_ts.isoformat() if self.last_ts else None,
             "by_code": {
-                code: {"rule": s.rule, "caught": s.caught, "fixed": s.fixed, "open": s.open}
+                code: {
+                    "rule": s.rule,
+                    "caught": s.caught,
+                    "fixed": s.fixed,
+                    "open": s.open,
+                    "fix_rate": None if s.fix_rate is None else round(s.fix_rate, 2),
+                    "noisy": s.noisy,
+                }
                 for code, s in self.by_code.items()
             },
             "open_findings": self.open_findings,

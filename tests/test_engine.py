@@ -117,3 +117,24 @@ def test_explicit_non_python_files_are_skipped(tmp_path):
     }
     assert files == {"a.py", "tool"}
     assert Linter().lint_paths([tmp_path / "README.md"]).violations == []
+
+
+def test_directives_inside_strings_are_not_directives():
+    from conftest import codes
+
+    # In a string, `# lintex: ignore` is data: the eval on that line is still reported.
+    assert codes('x = eval("1  # lintex: ignore")\n') == ["LX203"]
+    assert codes('x = eval("1")  # lintex: ignore\n') == []
+    # A docstring that documents skip-file must not skip the file.
+    doc = '"""Usage:\n\n# lintex: skip-file\n"""\nx = eval("1")\n'
+    assert codes(doc) == ["LX203"]
+    assert codes("# lintex: skip-file\nx = eval('1')\n") == []
+    # skip-file must be a comment on its own line, not a trailing one.
+    assert codes("x = eval('1')  # see lintex: skip-file docs\n") == ["LX203"]
+
+
+def test_suppression_still_works_when_the_file_does_not_tokenize():
+    from conftest import codes
+
+    # Unterminated bracket: reported as LX001 unless suppressed on that line.
+    assert codes("x = (1,\n") == ["LX001"]

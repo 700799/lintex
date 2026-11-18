@@ -23,7 +23,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
-from lintex import knowledge
+from lintex import knowledge, versions
 from lintex.knowledge import ApiEntry
 from lintex.models import Autofix, Severity, Violation
 from lintex.rules.base import FileContext, Rule, is_compat_guarded
@@ -53,6 +53,19 @@ def _target(ctx: FileContext) -> tuple[int, int]:
     return ctx.config.target_version or sys.version_info[:2]
 
 
+def _still_exists(entry: ApiEntry, ctx: FileContext) -> bool:
+    """True when the project is pinned to a version of the package that still has this API.
+
+    `pydantic.BaseSettings` is wrong on pydantic 2 and right on 1.10. When lockfiles, pins
+    or `package-versions` show the project cannot be on the removing version, there is
+    nothing to report.
+    """
+    if entry.is_python or not entry.version:
+        return False
+    ceiling = versions.ceiling_for(entry.package, ctx.config.root, ctx.config.package_versions)
+    return ceiling is not None and ceiling.below(versions.parse(entry.version))
+
+
 class KnownBadApiRule(Rule):
     code = "LX101"
     name = "hallucinated-api"
@@ -64,7 +77,8 @@ class KnownBadApiRule(Rule):
         "`dict.iteritems()`, and every stdlib removal and `@deprecated` name typeshed knows. "
         "A stdlib removal is an error when the project's minimum Python (from "
         "`requires-python` or `target-version`) is at or past the removing version, and a "
-        "warning before that. Code inside `try/except ImportError` or `if sys.version_info` "
+        "warning before that. A third-party removal is skipped when lockfiles, pins or "
+        "`package-versions` show the project is on an older version that still has it. Code inside `try/except ImportError` or `if sys.version_info` "
         "guards is ignored. Knowledge lives in `lintex/knowledge/`; see the README to add to it."
     )
     node_types = (ast.Import, ast.ImportFrom, ast.Attribute, ast.Call, ast.Name)
@@ -79,6 +93,7 @@ class KnownBadApiRule(Rule):
                 and isinstance(node.ctx, ast.Load)
                 and node.id not in ctx.rebound
                 and node.id not in ctx.imports
+                and not ctx.star_import  # the name may come from `from compat import *`
                 and not is_compat_guarded(node, ctx)
             ):
                 target = _target(ctx)
@@ -97,7 +112,12 @@ class KnownBadApiRule(Rule):
             seen: set[str] = set()
             for name in _imported_names(node):
                 match = KB.match_prefix(name)
-                if match and match[0] not in seen and not is_compat_guarded(node, ctx):
+                if (
+                    match
+                    and match[0] not in seen
+                    and not is_compat_guarded(node, ctx)
+                    and not _still_exists(match[1], ctx)
+                ):
                     seen.add(match[0])
                     yield self._report(ctx, node, *match)
         elif isinstance(node, ast.Attribute):
@@ -113,6 +133,7 @@ class KnownBadApiRule(Rule):
                 entry
                 and qualified.count(".") + 1 > binding_parts
                 and not is_compat_guarded(node, ctx)
+                and not _still_exists(entry, ctx)
             ):
                 yield self._report(ctx, node, qualified, entry)
         elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
@@ -269,6 +290,41 @@ _PLATFORM_DEPENDENT = frozenset(
         "sysconfig",
     }
 )
+# Real names that exist on one OS only. LX102 checks against the interpreter running
+# lintex, so on Linux these look missing; they are not inventions.
+_OTHER_PLATFORM = {
+    "ctypes": {
+        "windll", "oledll", "WinDLL", "OleDLL", "WINFUNCTYPE", "WinError", "FormatError",
+        "GetLastError", "get_last_error", "set_last_error", "HRESULT",
+        "DllCanUnloadNow", "DllGetClassObject",
+    },
+    "os": {
+        "startfile", "add_dll_directory", "O_BINARY", "O_NOINHERIT", "O_TEMPORARY",
+        "O_RANDOM", "O_SEQUENTIAL", "O_SHORT_LIVED", "O_TEXT", "O_EXLOCK", "O_SHLOCK",
+        "P_DETACH", "P_OVERLAY", "chflags", "lchflags", "lchmod", "plock", "listdrives",
+        "listmounts", "listvolumes", "get_handle_inheritable", "set_handle_inheritable",
+    },
+    "signal": {"CTRL_C_EVENT", "CTRL_BREAK_EVENT", "SIGBREAK", "SIGINFO", "SIGEMT"},
+    "subprocess": {
+        "STARTUPINFO", "STARTF_USESHOWWINDOW", "STARTF_USESTDHANDLES", "SW_HIDE",
+        "STARTF_FORCEONFEEDBACK", "STARTF_FORCEOFFFEEDBACK", "STD_INPUT_HANDLE", "STD_OUTPUT_HANDLE", "STD_ERROR_HANDLE", "CREATE_NEW_CONSOLE",
+        "CREATE_NEW_PROCESS_GROUP", "CREATE_NO_WINDOW", "DETACHED_PROCESS",
+        "CREATE_BREAKAWAY_FROM_JOB", "CREATE_DEFAULT_ERROR_MODE", "ABOVE_NORMAL_PRIORITY_CLASS",
+        "BELOW_NORMAL_PRIORITY_CLASS", "HIGH_PRIORITY_CLASS", "IDLE_PRIORITY_CLASS",
+        "NORMAL_PRIORITY_CLASS", "REALTIME_PRIORITY_CLASS",
+    },
+    "asyncio": {
+        "ProactorEventLoop", "IocpProactor", "WindowsSelectorEventLoopPolicy",
+        "WindowsProactorEventLoopPolicy",
+    },
+    "socket": {"AF_SYSTEM", "SIO_RCVALL", "SIO_KEEPALIVE_VALS", "SIO_LOOPBACK_FAST_PATH",
+               "RCVALL_ON", "RCVALL_OFF", "RCVALL_MAX", "RCVALL_SOCKETLEVELONLY"},
+    "ssl": {"enum_certificates", "enum_crls"},
+    "codecs": {"mbcs_encode", "mbcs_decode", "oem_encode", "oem_decode",
+               "code_page_encode", "code_page_decode"},
+}  # fmt: skip
+_OTHER_PLATFORM["socket"].add("fromshare")
+_OTHER_PLATFORM_PREFIXES = {"errno": ("WSA",)}
 _MISSING = object()
 _module_cache: dict[str, ModuleType | None] = {}
 
@@ -397,6 +453,8 @@ class NonexistentStdlibNameRule(Rule):
             name.startswith("_")  # private/internal names are not what agents invent
             or owner_name.startswith("_")
             or name in _DYNAMIC_ATTRS.get(owner_name, ())
+            or name in _OTHER_PLATFORM.get(owner_name, ())
+            or name.startswith(_OTHER_PLATFORM_PREFIXES.get(owner_name, ()))
             or name.startswith(_DYNAMIC_PREFIXES.get(owner_name, ()))
         ):
             return

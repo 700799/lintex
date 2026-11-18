@@ -1,0 +1,60 @@
+{
+  "packages": {
+    "attrs": "24.2.0",
+    "click": "8.1.7",
+    "flask": "3.0.3",
+    "httpx": "0.27.2",
+    "jinja2": "3.1.4",
+    "requests": "2.32.3",
+    "rich": "13.9.2",
+    "sqlalchemy": "2.0.35",
+    "packaging": "24.1",
+    "werkzeug": "3.0.4"
+  },
+  "select": [
+    "LX0",
+    "LX1",
+    "LX2",
+    "LX4"
+  ],
+  "counts": {
+    "attrs": {
+      "LX203": 1,
+      "LX402": 1
+    },
+    "click": {
+      "LX203": 8,
+      "LX402": 8
+    },
+    "flask": {
+      "LX203": 2,
+      "LX402": 1,
+      "LX403": 1
+    },
+    "httpx": {
+      "LX101": 1
+    },
+    "jinja2": {
+      "LX203": 4,
+      "LX402": 2
+    },
+    "packaging": {},
+    "requests": {},
+    "rich": {
+      "LX203": 1,
+      "LX402": 1,
+      "LX403": 1
+    },
+    "sqlalchemy": {
+      "LX101": 2,
+      "LX201": 33,
+      "LX203": 13,
+      "LX402": 11,
+      "LX403": 23
+    },
+    "werkzeug": {
+      "LX203": 2,
+      "LX402": 6
+    }
+  }
+}

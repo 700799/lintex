@@ -51,6 +51,7 @@ DEFAULT_EXCLUDE = (
 
 _TOP_LEVEL_KEYS = {
     "ledger",
+    "package-versions",
     "target-version",
     "select",
     "ignore",
@@ -94,6 +95,9 @@ class Config:
     #: The project's minimum Python (major, minor): `target-version`, else
     #: derived from `[project] requires-python`, else None (= the interpreter).
     target_version: tuple[int, int] | None = None
+    #: Explicit third-party versions (`package-versions`), normalised name -> version
+    #: or specifier. Overrides what lockfiles and pins say; see `lintex.versions`.
+    package_versions: dict[str, str] = field(default_factory=dict)
     rule_options: dict[str, dict[str, Any]] = field(default_factory=dict)
     root: Path = field(default_factory=Path.cwd)
     source: Path | None = None
@@ -149,6 +153,17 @@ class Config:
                 )
         else:
             cfg.target_version = requires_python_minimum(cfg.root)
+
+        pkgs = data.get("package-versions", {})
+        if not isinstance(pkgs, dict) or not all(
+            isinstance(v, (str, int, float)) for v in pkgs.values()
+        ):
+            raise ConfigError(
+                '`package-versions` must map package names to versions, e.g. pydantic = "1.10"'
+            )
+        from lintex.versions import normalize
+
+        cfg.package_versions = {normalize(str(k)): str(v) for k, v in pkgs.items()}
 
         rules = data.get("rules", {})
         if not isinstance(rules, dict) or not all(isinstance(v, dict) for v in rules.values()):
